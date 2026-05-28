@@ -22,31 +22,31 @@
 
 **Goal:** Set up the API Gateway, microservice skeletons, database schemas, and reorganize the frontend (`EX2` directory). Build basic user authentication.
 
-### Dev 1 (Lead & DevOps)
+### Oshri (Lead & DevOps)
 - [ ] Initialize the mono-repo or multi-repo structure for the microservices.
 - [ ] Create the **API Gateway** service (Node.js/Express) and set up routing to placeholder microservice ports.
 - [ ] Set up the MongoDB cluster and configure connection strings for each microservice.
 - [ ] Deploy the API Gateway and base microservices to Render/Vercel (CI/CD setup).
 
-### Dev 2 (Frontend Architect)
+### Matan (Frontend Architect)
 - [ ] Reorganize the existing `EX2` frontend directory into a vertical slice architecture (e.g., `src/features/user`, `src/features/bot`).
 - [ ] Inside each feature folder, create `logic/`, `data/`, and `presentation/` subdirectories.
 - [ ] Set up the base React routing to connect to the API Gateway.
 - [ ] Ensure the base layout and global styles (Tailwind/CSS) follow the Hebrew right-to-left (RTL) standard.
 
-### Dev 3 (Backend - User Service)
+### Tal (Backend - User Service)
 - [ ] Build the **User Service** (Node.js/Express).
 - [ ] Create MongoDB schemas for `User` (Child/Parent roles).
 - [ ] Implement REST endpoints for Parent Login, Child Login, and Profile creation.
 - [ ] Integrate JWT authentication and connect it to the API Gateway routing.
 
-### Dev 4 (Frontend - User Service & UI)
+### Refael (Frontend - User Service & UI)
 - [ ] Create the Login/Signup components (`presentation`) with **strict Hebrew UI**.
 - [ ] Implement state management (`data`) for user sessions.
 - [ ] Implement API calls (`logic`) to the API Gateway `/api/users` endpoints.
 - [ ] Build the Parent Portal dashboard skeleton (Hebrew UI).
 
-### Dev 5 (Backend - Bot/AI Service Foundation)
+### Dinza (Backend - Bot/AI Service Foundation)
 - [ ] Build the **Bot/AI Service** skeleton (Node.js/Express).
 - [ ] Set up OpenAI API connection and prompt engineering foundation.
 - [ ] Implement a basic `/api/bot/chat` endpoint via the API Gateway.
