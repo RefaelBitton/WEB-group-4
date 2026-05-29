@@ -29,9 +29,9 @@
 - [ ] Deploy the API Gateway and base microservices to Render/Vercel (CI/CD setup).
 
 ### Matan (Frontend Architect)
-- [V] Reorganize the existing `EX2` frontend directory into a vertical slice architecture (e.g., `src/features/user`, `src/features/bot`).
-- [V] Inside each feature folder, create `logic/`, `data/`, and `presentation/` subdirectories.
-- [ ] Set up the base React routing to connect to the API Gateway.
+- [x] Reorganize the existing `EX2` frontend directory into a vertical slice architecture (e.g., `src/features/user`, `src/features/bot`).
+- [x] Inside each feature folder, create `logic/`, `data/`, and `presentation/` subdirectories.
+- [x] Set up the base React routing to connect to the API Gateway.
 - [ ] Ensure the base layout and global styles (Tailwind/CSS) follow the Hebrew right-to-left (RTL) standard.
 
 ### Tal (Backend - User Service)
