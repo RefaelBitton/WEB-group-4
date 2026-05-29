@@ -6,8 +6,9 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
-#env
-/EX2/services/bot-service/.env
+# Ignore all .env files
+.env
+**/.env
 # Logs
 logs
 *.log
