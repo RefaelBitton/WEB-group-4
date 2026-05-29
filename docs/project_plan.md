@@ -46,7 +46,7 @@
 - [ ] Implement API calls (`logic`) to the API Gateway `/api/users` endpoints.
 - [ ] Build the Parent Portal dashboard skeleton (Hebrew UI).
 
-### Dinza (Backend - Bot/AI Service Foundation)
+### Dean (Backend - Bot/AI Service Foundation)
 - [ ] Build the **Bot/AI Service** skeleton (Node.js/Express).
 - [ ] Set up OpenAI API connection and prompt engineering foundation.
 - [ ] Implement a basic `/api/bot/chat` endpoint via the API Gateway.
