@@ -47,10 +47,10 @@
 - [ ] Build the Parent Portal dashboard skeleton (Hebrew UI).
 
 ### Dean (Backend - Bot/AI Service Foundation)
-- [ ] Build the **Bot/AI Service** skeleton (Node.js/Express).
-- [ ] Set up OpenAI API connection and prompt engineering foundation.
-- [ ] Implement a basic `/api/bot/chat` endpoint via the API Gateway.
-- [ ] Create the logic to generate a random English conversation starter upon chat entry.
+- [x] Build the **Bot/AI Service** skeleton (Node.js/Express).
+- [x] Set up OpenAI API connection and prompt engineering foundation.
+- [x] Implement a basic `/api/bot/chat` endpoint via the API Gateway.
+- [x] Create the logic to generate a random English conversation starter upon chat entry.
 
 ---
 
