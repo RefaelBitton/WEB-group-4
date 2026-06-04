@@ -23,10 +23,10 @@
 **Goal:** Set up the API Gateway, microservice skeletons, database schemas, and reorganize the frontend (`EX2` directory). Build basic user authentication.
 
 ### Oshri (Lead & DevOps)
-- [ ] Initialize the mono-repo or multi-repo structure for the microservices.
-- [ ] Create the **API Gateway** service (Node.js/Express) and set up routing to placeholder microservice ports.
-- [ ] Set up the MongoDB cluster and configure connection strings for each microservice.
-- [ ] Deploy the API Gateway and base microservices to Render/Vercel (CI/CD setup).
+- [x] Initialize the mono-repo or multi-repo structure for the microservices.
+- [x] Create the **API Gateway** service (Node.js/Express) and set up routing to placeholder microservice ports.
+- [x] Set up the MongoDB cluster and configure connection strings for each microservice.
+- [x] Deploy the API Gateway and base microservices to Render/Vercel (CI/CD setup).
 
 ### Matan (Frontend Architect)
 - [x] Reorganize the existing `EX2` frontend directory into a vertical slice architecture (e.g., `src/features/user`, `src/features/bot`).
