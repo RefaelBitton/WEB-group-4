@@ -41,10 +41,10 @@
 - [ ] Integrate JWT authentication and connect it to the API Gateway routing.
 
 ### Refael (Frontend - User Service & UI)
-- [ ] Create the Login/Signup components (`presentation`) with **strict Hebrew UI**.
-- [ ] Implement state management (`data`) for user sessions.
-- [ ] Implement API calls (`logic`) to the API Gateway `/api/users` endpoints.
-- [ ] Build the Parent Portal dashboard skeleton (Hebrew UI).
+- [x] Create the Login/Signup components (`presentation`) with **strict Hebrew UI**.
+- [x] Implement state management (`data`) for user sessions.
+- [x] Implement API calls (`logic`) to the API Gateway `/api/users` endpoints.
+- [x] Build the Parent Portal dashboard skeleton (Hebrew UI).
 
 ### Dinza (Backend - Bot/AI Service Foundation)
 - [ ] Build the **Bot/AI Service** skeleton (Node.js/Express).
