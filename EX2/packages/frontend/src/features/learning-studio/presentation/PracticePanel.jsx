@@ -1,3 +1,5 @@
+import React from 'react';
+
 export function PracticePanel({ lesson, answer, feedback, onAnswerChange, onSubmit }) {
   return (
     <section className="xl:col-span-3 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

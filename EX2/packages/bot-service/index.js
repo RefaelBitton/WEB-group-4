@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
+import chatRoutes from "./src/routes/chat.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -31,10 +32,8 @@ app.get("/health", (req, res) => {
   });
 });
 
-// A dummy route as placeholder for Sprint 1
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to the Bot/AI Service API skeleton!" });
-});
+// Mount Bot Routes
+app.use("/api/bot", chatRoutes);
 
 // Connect to MongoDB
 mongoose

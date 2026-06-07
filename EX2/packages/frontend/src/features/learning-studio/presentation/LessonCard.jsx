@@ -1,3 +1,5 @@
+import React from 'react';
+
 export function LessonCard({ lesson, isSelected, onSelect }) {
   return (
     <button

@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { getAIClient, SYSTEM_PROMPT } = require('../utils/aiPromptSetup');
+import { getAIClient, SYSTEM_PROMPT } from '../utils/aiPromptSetup.js';
 
 // Helper to format history for the Gemini API
 const formatHistory = (messages) => {
@@ -31,21 +31,6 @@ router.post('/chat', async (req, res) => {
     // Format previous history
     const formattedHistory = formatHistory(history);
     
-    // We start a chat session. In the new @google/genai SDK:
-    const chat = ai.chats.create({
-      model: 'gemini-2.5-flash',
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        temperature: 0.7,
-      }
-    });
-
-    // If there is history, we need to handle it. 
-    // The @google/genai sdk allows passing history directly to the create method if needed,
-    // but a common pattern is to just send the conversation as a list of contents.
-    // Let's pass the history in the config or handle it via a multi-turn request.
-    // For simplicity with the new SDK, we can pass history in `create` if supported, or manually construct the payload.
-    // Let's use the explicit history parameter for create:
     const chatSession = ai.chats.create({
       model: 'gemini-2.5-flash',
       config: {
@@ -108,4 +93,4 @@ router.get('/starter', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,3 +1,4 @@
+import React from 'react';
 import { LessonPicker } from "./LessonPicker.jsx";
 import { PracticePanel } from "./PracticePanel.jsx";
 import { ProgressPanel } from "./ProgressPanel.jsx";

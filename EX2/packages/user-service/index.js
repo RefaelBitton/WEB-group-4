@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
+import authRoutes from "./src/routes/authRoutes.js";
+import profileRoutes from "./src/routes/profileRoutes.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -31,10 +33,9 @@ app.get("/health", (req, res) => {
   });
 });
 
-// A dummy route as placeholder for Sprint 1
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to the User Service API skeleton!" });
-});
+// Mount User Routes
+app.use("/api/users", authRoutes);
+app.use("/api/users", profileRoutes);
 
 // Connect to MongoDB
 mongoose

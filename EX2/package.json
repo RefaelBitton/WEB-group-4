@@ -12,26 +12,11 @@
     "dev:bot-service": "npm run dev -w packages/bot-service",
     "dev:game-service": "npm run dev -w packages/game-service",
     "dev:reporting-service": "npm run dev -w packages/reporting-service",
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:api-gateway\" \"npm run dev:user-service\" \"npm run dev:bot-service\" \"npm run dev:game-service\" \"npm run dev:reporting-service\""
+    "dev": "concurrently -k -n \"front,api,user,bot,game,rep\" -c \"cyan,green,yellow,blue,magenta,red\" \"npm run dev:frontend\" \"cd packages/api-gateway && node --watch index.js\" \"cd packages/user-service && node --watch index.js\" \"cd packages/bot-service && node --watch index.js\" \"cd packages/game-service && node --watch index.js\" \"cd packages/reporting-service && node --watch index.js\""
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
     "prettier": "3.8.3",
     "vite": "^8.0.10"
-  },
-  "dependencies": {
-    "@tailwindcss/vite": "^4.2.4",
-    "lucide-react": "^0.475.0",
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^8.20.1",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "react-router-dom": "^7.16.0",
-    "tailwindcss": "^4.2.4",
-    "zustand": "^5.0.14"
   }
 }

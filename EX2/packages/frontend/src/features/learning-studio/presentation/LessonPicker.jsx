@@ -1,3 +1,4 @@
+import React from 'react';
 import { LessonCard } from "./LessonCard.jsx";
 
 export function LessonPicker({ lessons, selectedLessonId, onSelectLesson }) {

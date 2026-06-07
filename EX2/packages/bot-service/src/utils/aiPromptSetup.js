@@ -1,4 +1,4 @@
-const { GoogleGenAI } = require('@google/genai');
+import { GoogleGenAI } from '@google/genai';
 
 let aiClient = null;
 
@@ -14,7 +14,7 @@ const initializeAI = () => {
   return aiClient;
 };
 
-const getAIClient = () => {
+export const getAIClient = () => {
   if (!aiClient) {
     return initializeAI();
   }
@@ -25,7 +25,7 @@ const getAIClient = () => {
 // 1. Bot speaks English but provides gentle error corrections in Hebrew.
 // 2. Child-friendly (ages 6-12).
 // 3. Simple English.
-const SYSTEM_PROMPT = `
+export const SYSTEM_PROMPT = `
 You are a friendly, encouraging English teacher for children (ages 6-12).
 Your goal is to have short, simple English conversations with the child to help them practice.
 
@@ -40,8 +40,3 @@ Child: "I has a dog."
 You: "That's wonderful! I love dogs. What is your dog's name?
 (Hebrew Correction: שים לב, אומרים I have במקום I has.)"
 `;
-
-module.exports = {
-  getAIClient,
-  SYSTEM_PROMPT
-};
