@@ -35,10 +35,10 @@
 - [x] Ensure the base layout and global styles (Tailwind/CSS) follow the Hebrew right-to-left (RTL) standard.
 
 ### Tal (Backend - User Service)
-- [ ] Build the **User Service** (Node.js/Express).
-- [ ] Create MongoDB schemas for `User` (Child/Parent roles).
-- [ ] Implement REST endpoints for Parent Login, Child Login, and Profile creation.
-- [ ] Integrate JWT authentication and connect it to the API Gateway routing.
+- [x] Build the **User Service** (Node.js/Express).
+- [x] Create MongoDB schemas for `User` (Child/Parent roles).
+- [x] Implement REST endpoints for Parent Login, Child Login, and Profile creation.
+- [x] Integrate JWT authentication and connect it to the API Gateway routing.
 
 ### Refael (Frontend - User Service & UI)
 - [x] Create the Login/Signup components (`presentation`) with **strict Hebrew UI**.
