@@ -1,14 +1,21 @@
 {
-  "name": "web_project",
-  "version": "0.0.0",
+  "name": "english-learning-bot-monorepo",
+  "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev:frontend": "npm run dev -w packages/frontend",
+    "dev:api-gateway": "npm run dev -w packages/api-gateway",
+    "dev:user-service": "npm run dev -w packages/user-service",
+    "dev:bot-service": "npm run dev -w packages/bot-service",
+    "dev:game-service": "npm run dev -w packages/game-service",
+    "dev:reporting-service": "npm run dev -w packages/reporting-service",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:api-gateway\" \"npm run dev:user-service\" \"npm run dev:bot-service\" \"npm run dev:game-service\" \"npm run dev:reporting-service\""
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "prettier": "3.8.3",
     "vite": "^8.0.10"
   },

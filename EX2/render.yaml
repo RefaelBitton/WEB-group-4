@@ -1,0 +1,91 @@
+services:
+  # API Gateway
+  - type: web
+    name: api-gateway
+    env: node
+    plan: free
+    rootDir: EX2
+    buildCommand: npm install
+    startCommand: node packages/api-gateway/index.js
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: USER_SERVICE_URL
+        value: http://user-service:3001
+      - key: BOT_SERVICE_URL
+        value: http://bot-service:3002
+      - key: GAME_SERVICE_URL
+        value: http://game-service:3003
+      - key: REPORTING_SERVICE_URL
+        value: http://reporting-service:3004
+
+  # User Service (Private Service - inside internal network)
+  - type: pserv
+    name: user-service
+    env: node
+    plan: free
+    rootDir: EX2
+    buildCommand: npm install
+    startCommand: node packages/user-service/index.js
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: MONGO_URI
+        sync: false
+
+  # Bot Service (Private Service - inside internal network)
+  - type: pserv
+    name: bot-service
+    env: node
+    plan: free
+    rootDir: EX2
+    buildCommand: npm install
+    startCommand: node packages/bot-service/index.js
+    envVars:
+      - key: PORT
+        value: 3002
+      - key: MONGO_URI
+        sync: false
+
+  # Game Service (Private Service - inside internal network)
+  - type: pserv
+    name: game-service
+    env: node
+    plan: free
+    rootDir: EX2
+    buildCommand: npm install
+    startCommand: node packages/game-service/index.js
+    envVars:
+      - key: PORT
+        value: 3003
+      - key: MONGO_URI
+        sync: false
+
+  # Reporting Service (Private Service - inside internal network)
+  - type: pserv
+    name: reporting-service
+    env: node
+    plan: free
+    rootDir: EX2
+    buildCommand: npm install
+    startCommand: node packages/reporting-service/index.js
+    envVars:
+      - key: PORT
+        value: 3004
+      - key: MONGO_URI
+        sync: false
+
+  # React Frontend (Static Site deployment)
+  - type: web
+    name: english-learning-bot-frontend
+    env: static
+    plan: free
+    rootDir: EX2
+    buildCommand: npm install && npm run build -w packages/frontend
+    publishDir: packages/frontend/dist
+    envVars:
+      - key: VITE_API_GATEWAY_URL
+        fromService:
+          name: api-gateway
+          type: web
+          property: host
