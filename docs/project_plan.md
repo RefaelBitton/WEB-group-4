@@ -58,31 +58,31 @@
 
 **Goal:** Deliver the interactive English bot (with Speech-to-Text) and build the core minigames.
 
-### Dev 1 (Backend - Bot/AI Service)
+### Oshri (Backend - Bot/AI Service)
 - [ ] Implement the prompt logic to enforce: Bot speaks English but provides gentle error corrections in Hebrew.
 - [ ] Integrate a Speech-to-Text (STT) service (e.g., OpenAI Whisper or Web Speech API backend handler) in the Bot Service.
 - [ ] Create an endpoint for evaluating student messages and returning the bot's response + Hebrew correction.
 - [ ] Ensure all bot endpoints are correctly routed through the API Gateway.
 
-### Dev 2 (Frontend - Bot UI)
+### Refael (Frontend - Bot UI)
 - [ ] Build the Chat Interface (`presentation`) in the Bot feature slice (Hebrew UI for buttons/menus).
 - [ ] Implement microphone recording functionality in the browser and send audio/text to the API Gateway (`logic`).
 - [ ] Display the random conversation starter when the chat window opens.
 - [ ] Render the bot's English response and highlight the Hebrew error corrections distinctively.
 
-### Dev 3 (Backend - Game Service)
+### Tal (Backend - Game Service)
 - [ ] Build the **Game Service** (Node.js/Express).
 - [ ] Create MongoDB schemas for `GameType`, `Question`, and `GameSession`.
 - [ ] Implement endpoints for fetching game data (Image Recognition, Sentence Completion, Translation).
 - [ ] Implement an endpoint to validate answers and calculate score/points. Route through API Gateway.
 
-### Dev 4 (Frontend - Minigames UI)
+### Dean (Frontend - Minigames UI)
 - [ ] Build the Minigames Hub (`presentation`) (Hebrew menus/instructions).
 - [ ] Implement the Image Recognition game component.
 - [ ] Implement the Sentence Completion game component.
 - [ ] Implement the Translation game component.
 
-### Dev 5 (Backend/Frontend - Integration)
+### Matan (Backend/Frontend - Integration)
 - [ ] Connect the frontend game components to the API Gateway `/api/games` endpoints (`logic`).
 - [ ] Manage the state of active games (`data`) and handle transitions between questions.
 - [ ] Handle error states and loading screens (in Hebrew) during bot and game API calls.
