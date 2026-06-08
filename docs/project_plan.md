@@ -65,10 +65,10 @@
 - [ ] Ensure all bot endpoints are correctly routed through the API Gateway.
 
 ### Refael (Frontend - Bot UI)
-- [ ] Build the Chat Interface (`presentation`) in the Bot feature slice (Hebrew UI for buttons/menus).
-- [ ] Implement microphone recording functionality in the browser and send audio/text to the API Gateway (`logic`).
-- [ ] Display the random conversation starter when the chat window opens.
-- [ ] Render the bot's English response and highlight the Hebrew error corrections distinctively.
+- [x] Build the Chat Interface (`presentation`) in the Bot feature slice (Hebrew UI for buttons/menus).
+- [x] Implement microphone recording functionality in the browser and send audio/text to the API Gateway (`logic`).
+- [x] Display the random conversation starter when the chat window opens.
+- [x] Render the bot's English response and highlight the Hebrew error corrections distinctively.
 
 ### Tal (Backend - Game Service)
 - [ ] Build the **Game Service** (Node.js/Express).
@@ -83,6 +83,7 @@
 - [ ] Implement the Translation game component.
 
 ### Matan (Backend/Frontend - Integration)
+- [ ] Integrate Refael's completed `BotChat` component into the `ChildDashboard` view (or appropriate route) so it's accessible to users.
 - [ ] Connect the frontend game components to the API Gateway `/api/games` endpoints (`logic`).
 - [ ] Manage the state of active games (`data`) and handle transitions between questions.
 - [ ] Handle error states and loading screens (in Hebrew) during bot and game API calls.
