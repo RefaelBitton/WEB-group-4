@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { fetchGameList, submitGameAnswer } from "../logic/gameApi.js";
+import { fetchGameList, submitGameAnswer, fetchGameSession } from "../logic/gameApi.js";
 
 export function useGame() {
   const [games, setGames] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -22,16 +23,37 @@ export function useGame() {
     loadGames();
   }, []);
 
+  async function loadNextQuestion(gameId) {
+    setLoading(true);
+    try {
+      const q = await fetchGameSession(gameId);
+      setCurrentQuestion(q);
+    } catch (err) {
+      setError("שגיאה בטעינת השאלה.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function selectGame(gameId) {
+    if (!gameId) {
+      setSelectedGame(null);
+      setCurrentQuestion(null);
+      return;
+    }
     const game = games.find((item) => item.id === gameId);
     setSelectedGame(game || { id: gameId, name: "משחק" });
+    await loadNextQuestion(gameId);
   }
 
   async function answerGame(gameId, payload) {
     setLoading(true);
     setError(null);
     try {
-      return await submitGameAnswer(gameId, payload);
+      const result = await submitGameAnswer(gameId, payload);
+      // Automatically load the next question after answering
+      await loadNextQuestion(gameId);
+      return result;
     } catch (err) {
       setError("שגיאה בשליחת תשובה. נסה שוב.");
       return null;
@@ -43,6 +65,7 @@ export function useGame() {
   return {
     games,
     selectedGame,
+    currentQuestion,
     selectGame,
     answerGame,
     loading,

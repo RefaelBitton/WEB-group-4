@@ -77,10 +77,10 @@
 - [ ] Implement an endpoint to validate answers and calculate score/points. Route through API Gateway.
 
 ### Dean (Frontend - Minigames UI)
-- [ ] Build the Minigames Hub (`presentation`) (Hebrew menus/instructions).
-- [ ] Implement the Image Recognition game component.
-- [ ] Implement the Sentence Completion game component.
-- [ ] Implement the Translation game component.
+- [x] Build the Minigames Hub (`presentation`) (Hebrew menus/instructions).
+- [x] Implement the Image Recognition game component.
+- [x] Implement the Sentence Completion game component.
+- [x] Implement the Translation game component.
 
 ### Matan (Backend/Frontend - Integration)
 - [ ] Integrate Refael's completed `BotChat` component into the `ChildDashboard` view (or appropriate route) so it's accessible to users.
