@@ -21,6 +21,25 @@ export const getAIClient = () => {
   return aiClient;
 };
 
+export const EVALUATION_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    response: {
+      type: "STRING",
+      description: "Your friendly response to the child in simple, easy English. Do not include any Hebrew here. Keep it short and end with a simple follow-up question."
+    },
+    hasErrors: {
+      type: "BOOLEAN",
+      description: "True if the user made any grammatical, spelling, or syntactic mistakes in their English input, otherwise false."
+    },
+    correction: {
+      type: "STRING",
+      description: "A gentle, brief correction in Hebrew explaining the error and how to fix it. Keep it simple and friendly. Leave empty if hasErrors is false."
+    }
+  },
+  required: ["response", "hasErrors", "correction"]
+};
+
 // The strict prompt based on the constraints:
 // 1. Bot speaks English but provides gentle error corrections in Hebrew.
 // 2. Child-friendly (ages 6-12).
@@ -29,14 +48,17 @@ export const SYSTEM_PROMPT = `
 You are a friendly, encouraging English teacher for children (ages 6-12).
 Your goal is to have short, simple English conversations with the child to help them practice.
 
-CRITICAL RULES:
-1. You MUST speak to the child ONLY in simple, easy-to-understand English. Keep sentences short.
-2. If the child makes a grammar or spelling mistake in their English message, you MUST provide a gentle correction ONLY in Hebrew.
-3. Place the Hebrew correction at the very end of your response, separated by a newline and marked clearly. If there are no mistakes, do not include any Hebrew.
-4. Always ask a simple follow-up question in English to keep the conversation going.
+You must respond in JSON format matching the schema provided:
+1. In the 'response' field, speak to the child ONLY in simple, easy-to-understand English. Keep sentences short and always end with a simple follow-up question in English to keep the conversation going. Do NOT include any Hebrew here.
+2. If the child makes any grammar, spelling, or word choice mistake in their English message, set 'hasErrors' to true. Otherwise, set it to false.
+3. If 'hasErrors' is true, provide a gentle, clear error correction ONLY in Hebrew in the 'correction' field. Explain the mistake simply and how to say it correctly (e.g., "שים לב, אומרים I have במקום I has."). If 'hasErrors' is false, leave 'correction' as an empty string.
 
 Example interaction:
 Child: "I has a dog."
-You: "That's wonderful! I love dogs. What is your dog's name?
-(Hebrew Correction: שים לב, אומרים I have במקום I has.)"
+Your JSON response:
+{
+  "response": "That's wonderful! I love dogs. What is your dog's name?",
+  "hasErrors": true,
+  "correction": "שים לב, אומרים I have במקום I has."
+}
 `;

@@ -55,16 +55,16 @@ const createServiceProxy = (pathFilter, targetUrl) => {
 
 // Route Proxying Setup
 // 1. User Service
-app.use("/api/users", createServiceProxy("/api/users", USER_SERVICE_URL));
+app.use(createServiceProxy("/api/users", USER_SERVICE_URL));
 
 // 2. Bot/AI Service
-app.use("/api/bot", createServiceProxy("/api/bot", BOT_SERVICE_URL));
+app.use(createServiceProxy("/api/bot", BOT_SERVICE_URL));
 
 // 3. Game Service
-app.use("/api/games", createServiceProxy("/api/games", GAME_SERVICE_URL));
+app.use(createServiceProxy("/api/games", GAME_SERVICE_URL));
 
 // 4. Reporting Service
-app.use("/api/reports", createServiceProxy("/api/reports", REPORTING_SERVICE_URL));
+app.use(createServiceProxy("/api/reports", REPORTING_SERVICE_URL));
 
 // Fallback for unhandled gateway paths
 app.use((req, res) => {

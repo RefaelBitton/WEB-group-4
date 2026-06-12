@@ -15,11 +15,13 @@ dotenv.config();
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.BOT_SERVICE_PORT || process.env.PORT || 3002;
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/english_learning_bot";
 
 app.use(cors());
-app.use(express.json());
+app.use(express.raw({ type: "audio/*", limit: "10mb" }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(morgan("dev"));
 
 // Health check endpoint
