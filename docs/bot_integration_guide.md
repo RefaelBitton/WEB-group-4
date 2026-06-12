@@ -6,16 +6,16 @@ This guide is intended for developers and AI agents working on other parts of th
 
 The Bot Service is a Node.js/Express microservice that handles AI chat capabilities. It uses the `@google/genai` SDK and the `gemini-2.5-flash` model to provide English conversation functionality with Hebrew error corrections (as defined by its system prompt).
 
-- **Default Port:** `5002` (configurable via `.env`)
-- **Base URL:** `http://localhost:5002`
+- **Default Port:** `3002` (configurable via `BOT_SERVICE_PORT` or `PORT` in `.env`)
+- **Base URL:** `http://localhost:3002` (or via API Gateway at `http://localhost:3000/api/bot`)
 
 ## Environment Setup
 
-To run the Bot Service locally, ensure you have a `.env` file in `EX2/services/bot-service/` with the following variables:
+To run the Bot Service locally, ensure you have a `.env` file in the root `EX2/` directory with the following variables:
 
 ```env
 GEMINI_API_KEY="your_google_gemini_api_key_here"
-PORT=5002
+BOT_SERVICE_PORT=3002
 ```
 
 ## API Endpoints
@@ -84,8 +84,49 @@ Sends a new message from the user to the bot, taking previous conversation histo
   - `503 Service Unavailable`: If the AI service fails to initialize (e.g., missing API key).
   - `500 Internal Server Error`: If generating the response fails.
 
+### 4. Evaluate Student Message
+Evaluates a student's English message for grammar and spelling errors, returning a structured JSON response containing the English reply, Hebrew correction, and error flag.
+
+- **Method:** `POST`
+- **Path:** `/api/bot/evaluate`
+- **Headers:** `Content-Type: application/json`
+- **Request Body:** Same as `/api/bot/chat` (expects `message` and optional `history`).
+- **Success Response (200 OK):**
+  ```json
+  {
+    "response": "That's wonderful! I love dogs. What is your dog's name?",
+    "hasErrors": true,
+    "correction": "שים לב, אומרים I have במקום I has."
+  }
+  ```
+
+### 5. Transcribe Audio (Speech-to-Text)
+Transcribes spoken English audio into text using Gemini's native multimodal capabilities. Supports both JSON payload with base64 audio and raw binary upload.
+
+- **Method:** `POST`
+- **Path:** `/api/bot/transcribe` (or `/api/bot/stt` as an alias)
+- **Headers:**
+  - For base64: `Content-Type: application/json`
+  - For raw binary: `Content-Type: audio/webm` (or `audio/wav`, `audio/mpeg`, etc.)
+- **Request Body:**
+  - **JSON option:**
+    ```json
+    {
+      "audio": "base64_encoded_audio_data_here",
+      "mimeType": "audio/webm"
+    }
+    ```
+  - **Raw binary option:** Send the raw audio file as the request body.
+- **Success Response (200 OK):**
+  ```json
+  {
+    "transcription": "Hello I have a dog",
+    "text": "Hello I have a dog"
+  }
+  ```
+
 ## Integration Notes for Frontend / API Gateway Agents
 
-1. **Routing:** If you are building the API Gateway, you should route frontend requests from `/api/bot/*` to `http://bot-service:5002/api/bot/*` (or whatever the host/port is in your environment).
-2. **State Management:** The frontend is responsible for maintaining the `history` array and sending the full history with every `POST /api/bot/chat` request. The Bot Service is stateless and does not store conversation history in a database directly.
-3. **Audio Handling:** Currently, the endpoints only accept text (`message`). Any Speech-to-Text (STT) processing should happen before calling this endpoint (either in the frontend using Web Speech API or in a separate handler).
+1. **Routing:** If you are building the API Gateway, you should route frontend requests from `/api/bot/*` to `http://bot-service:3002/api/bot/*` (or whatever the host/port is in your environment). The gateway already proxies `/api/bot/*` correctly!
+2. **State Management:** The frontend is responsible for maintaining the `history` array and sending the full history with every `POST /api/bot/chat` or `/api/bot/evaluate` request.
+3. **Audio Handling:** You can transcribe voice recordings using either the browser's client-side Web Speech API or by sending audio to the `/api/bot/transcribe` backend endpoint (which uses Gemini STT).

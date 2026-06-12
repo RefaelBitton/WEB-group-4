@@ -59,10 +59,10 @@
 **Goal:** Deliver the interactive English bot (with Speech-to-Text) and build the core minigames.
 
 ### Oshri (Backend - Bot/AI Service)
-- [ ] Implement the prompt logic to enforce: Bot speaks English but provides gentle error corrections in Hebrew.
-- [ ] Integrate a Speech-to-Text (STT) service (e.g., OpenAI Whisper or Web Speech API backend handler) in the Bot Service.
-- [ ] Create an endpoint for evaluating student messages and returning the bot's response + Hebrew correction.
-- [ ] Ensure all bot endpoints are correctly routed through the API Gateway.
+- [x] Implement the prompt logic to enforce: Bot speaks English but provides gentle error corrections in Hebrew.
+- [x] Integrate a Speech-to-Text (STT) service (e.g., OpenAI Whisper or Web Speech API backend handler) in the Bot Service.
+- [x] Create an endpoint for evaluating student messages and returning the bot's response + Hebrew correction.
+- [x] Ensure all bot endpoints are correctly routed through the API Gateway.
 
 ### Refael (Frontend - Bot UI)
 - [x] Build the Chat Interface (`presentation`) in the Bot feature slice (Hebrew UI for buttons/menus).
