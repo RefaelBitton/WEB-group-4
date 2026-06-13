@@ -36,11 +36,11 @@ const GAME_SERVICE_URL = process.env.GAME_SERVICE_URL || "http://localhost:3003"
 const REPORTING_SERVICE_URL = process.env.REPORTING_SERVICE_URL || "http://localhost:3004";
 
 // Helper function to create standard proxy configurations
-const createServiceProxy = (pathFilter, targetUrl) => {
+const createServiceProxy = (targetUrl) => {
   return createProxyMiddleware({
     target: targetUrl,
     changeOrigin: true,
-    pathFilter: pathFilter,
+    pathRewrite: (_path, req) => req.originalUrl,
     logger: console,
     onError: (err, req, res) => {
       console.error(`[Gateway Proxy Error] target: ${targetUrl}, path: ${req.url}`, err);
@@ -55,16 +55,16 @@ const createServiceProxy = (pathFilter, targetUrl) => {
 
 // Route Proxying Setup
 // 1. User Service
-app.use("/api/users", createServiceProxy("/api/users", USER_SERVICE_URL));
+app.use("/api/users", createServiceProxy(USER_SERVICE_URL));
 
 // 2. Bot/AI Service
-app.use("/api/bot", createServiceProxy("/api/bot", BOT_SERVICE_URL));
+app.use("/api/bot", createServiceProxy(BOT_SERVICE_URL));
 
 // 3. Game Service
-app.use("/api/games", createServiceProxy("/api/games", GAME_SERVICE_URL));
+app.use("/api/games", createServiceProxy(GAME_SERVICE_URL));
 
 // 4. Reporting Service
-app.use("/api/reports", createServiceProxy("/api/reports", REPORTING_SERVICE_URL));
+app.use("/api/reports", createServiceProxy(REPORTING_SERVICE_URL));
 
 // Fallback for unhandled gateway paths
 app.use((req, res) => {
