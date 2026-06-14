@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const BOT_SERVICE_URL = "http://localhost:3002";
-const API_GATEWAY_URL = "http://localhost:3000";
+const API_GATEWAY_URL = "http://localhost:4000";
 
 async function testHealth(baseUrl, name) {
   try {
