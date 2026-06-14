@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useUserStore } from '../data/userStore';
-import { registerUser } from '../logic/api';
+import { registerParent } from '../logic/api';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Lock, Mail } from 'lucide-react';
+import { User as UserIcon, Lock, Mail } from 'lucide-react';
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -16,11 +16,11 @@ export default function Signup() {
     setLoading(true);
     setError(null);
     try {
-      const response = await registerUser({ name, email, password, role: 'parent' });
-      setUser(response.user, response.token);
+      const response = await registerParent({ name, email, password });
+      setUser(response.user, response.accessToken);
       navigate('/portal');
     } catch (err) {
-      setError('שגיאה בהרשמה. אנא נסה שוב.');
+      setError(err.message || 'שגיאה בהרשמה. אנא נסה שוב.');
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,7 @@ export default function Signup() {
             <label className="block text-sm font-medium text-gray-700 mb-2">שם מלא</label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-gray-400" />
+                <UserIcon className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 type="text"
@@ -86,7 +86,7 @@ export default function Signup() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-3 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-900"
-                placeholder="הכנס סיסמה"
+                placeholder="לפחות 6 תווים"
                 required
               />
             </div>

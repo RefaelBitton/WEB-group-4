@@ -33,7 +33,7 @@ router.post('/chat', async (req, res) => {
     const formattedHistory = formatHistory(history);
     
     const chatSession = ai.chats.create({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       config: {
         systemInstruction: SYSTEM_PROMPT,
         temperature: 0.7,
@@ -43,19 +43,28 @@ router.post('/chat', async (req, res) => {
       history: formattedHistory
     });
 
-    // Send the new message
-    const response = await chatSession.sendMessage({ message });
-
     let evaluation;
     try {
-      evaluation = JSON.parse(response.text);
-    } catch (e) {
-      console.error('Failed to parse structured JSON response from Gemini:', response.text);
-      evaluation = {
-        response: response.text,
-        hasErrors: false,
-        correction: ''
-      };
+      // Send the new message
+      const response = await chatSession.sendMessage({ message });
+      try {
+        evaluation = JSON.parse(response.text);
+      } catch (e) {
+        console.error('Failed to parse structured JSON response from Gemini:', response.text);
+        evaluation = {
+          response: response.text,
+          hasErrors: false,
+          correction: ''
+        };
+      }
+    } catch (apiError) {
+      console.warn('Gemini API request failed, using fallback response. Error:', apiError.message);
+      const fallbacks = [
+        { response: "That's wonderful! Can you tell me more about it in simple words?", hasErrors: false, correction: "" },
+        { response: "Nice! What is your favorite animal or hobby?", hasErrors: false, correction: "" },
+        { response: "I like talking to you! What did you do today?", hasErrors: false, correction: "" }
+      ];
+      evaluation = fallbacks[Math.floor(Math.random() * fallbacks.length)];
     }
 
     // Format content by appending Hebrew correction if mistakes exist
@@ -96,7 +105,7 @@ router.post('/evaluate', async (req, res) => {
     const formattedHistory = formatHistory(history);
     
     const chatSession = ai.chats.create({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       config: {
         systemInstruction: SYSTEM_PROMPT,
         temperature: 0.7,
@@ -106,18 +115,26 @@ router.post('/evaluate', async (req, res) => {
       history: formattedHistory
     });
 
-    // Send the new message
-    const response = await chatSession.sendMessage({ message });
-
     let evaluation;
     try {
-      evaluation = JSON.parse(response.text);
-    } catch (e) {
-      console.error('Failed to parse structured JSON response from Gemini in evaluate:', response.text);
+      // Send the new message
+      const response = await chatSession.sendMessage({ message });
+      try {
+        evaluation = JSON.parse(response.text);
+      } catch (e) {
+        console.error('Failed to parse structured JSON response from Gemini in evaluate:', response.text);
+        evaluation = {
+          response: response.text,
+          hasErrors: false,
+          correction: ''
+        };
+      }
+    } catch (apiError) {
+      console.warn('Gemini API request failed in evaluate, using fallback response. Error:', apiError.message);
       evaluation = {
-        response: response.text,
+        response: "I like talking to you! Let's practice more.",
         hasErrors: false,
-        correction: ''
+        correction: ""
       };
     }
 
@@ -159,9 +176,9 @@ const handleTranscribe = async (req, res) => {
       });
     }
 
-    // Call Gemini 2.5 Flash native Speech-To-Text
+    // Call Gemini 3.1 Flash Lite native Speech-To-Text
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: [
         {
           inlineData: {
@@ -215,7 +232,7 @@ router.get('/starter', async (req, res) => {
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: prompt,
       config: {
         temperature: 0.8,

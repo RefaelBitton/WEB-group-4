@@ -37,6 +37,17 @@ app.get("/health", (req, res) => {
 app.use("/api/users", authRoutes);
 app.use("/api/users", profileRoutes);
 
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error("User Service Error:", err);
+  const status = err.status || 500;
+  res.status(status).json({
+    error: {
+      message: err.message || "Internal server error",
+    },
+  });
+});
+
 // Connect to MongoDB
 mongoose
   .connect(MONGO_URI)
