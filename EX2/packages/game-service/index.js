@@ -38,14 +38,6 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to the Game Service API skeleton!" });
 });
 
-    // seed sample questions if empty
-    seedQuestions().catch(e => console.error('Seeding error', e.message));
-// Connect to MongoDB
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log("Connected to MongoDB successfully for Game Service");
-  })
 const seedQuestions = async () => {
   const count = await Question.countDocuments();
   if (count > 0) return;
@@ -94,6 +86,15 @@ const seedQuestions = async () => {
   console.log('Seeded sample questions for game-service');
 };
 
+// Connect to MongoDB and seed sample data
+mongoose
+  .connect(MONGO_URI)
+  .then(async () => {
+    console.log("Connected to MongoDB successfully for Game Service");
+    await seedQuestions().catch((err) => {
+      console.error("Failed to seed sample questions for Game Service:", err.message);
+    });
+  })
   .catch((err) => {
     console.error("MongoDB connection error for Game Service:", err.message);
   });
@@ -146,8 +147,8 @@ app.post("/:gameId/answer", (req, res) => {
     // assume opt1 ("on") is correct as in frontend mock
     correct = payload.answerId === "opt1";
   } else if (gameId === "quick-translation") {
-    // expect "Cat" -> opt1
-    correct = payload.answerId === "opt1";
+    // the correct answer for כלב is Dog
+    correct = payload.answerId === "opt2";
   } else if (gameId === "image-recognition") {
     // arbitrary accept opt1 as correct for demo
     correct = payload.answerId === "opt1";

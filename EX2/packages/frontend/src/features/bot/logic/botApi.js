@@ -13,3 +13,12 @@ export async function getConversationStarter() {
   const response = await fetch(`${BOT_API}/starter`);
   return response.json();
 }
+
+export async function transcribeAudio(audioBlob) {
+  const response = await fetch(`${BOT_API}/transcribe`, {
+    method: "POST",
+    headers: { "Content-Type": audioBlob.type || "audio/webm" },
+    body: audioBlob,
+  });
+  return response.json();
+}

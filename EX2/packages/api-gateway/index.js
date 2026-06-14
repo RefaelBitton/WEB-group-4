@@ -40,7 +40,7 @@ const createServiceProxy = (pathFilter, targetUrl) => {
   return createProxyMiddleware({
     target: targetUrl,
     changeOrigin: true,
-    pathFilter: pathFilter,
+    filter: pathFilter,
     logger: console,
     onError: (err, req, res) => {
       console.error(`[Gateway Proxy Error] target: ${targetUrl}, path: ${req.url}`, err);
