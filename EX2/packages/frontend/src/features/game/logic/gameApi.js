@@ -1,4 +1,4 @@
-const GAME_API = import.meta.env.VITE_API_URL ?? "http://localhost:3003";
+const GAME_API = import.meta.env.VITE_API_URL ?? "/api/games";
 
 export async function fetchGameList() {
   const response = await fetch(`${GAME_API}/list`);

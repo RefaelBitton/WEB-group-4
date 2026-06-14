@@ -15,7 +15,7 @@ export function useGame() {
         const data = await fetchGameList();
         setGames(data?.games || []);
       } catch (err) {
-        setError("לא ניתן לטעון משחקים כרגע.");
+        setError("לא ניתן לטעון משחקים כרגע. בדוק את החיבור לשרת.");
       } finally {
         setLoading(false);
       }
@@ -29,7 +29,7 @@ export function useGame() {
       const q = await fetchGameSession(gameId);
       setCurrentQuestion(q);
     } catch (err) {
-      setError("שגיאה בטעינת השאלה.");
+      setError("שגיאה בטעינת השאלה. נסה שוב מאוחר יותר.");
     } finally {
       setLoading(false);
     }
@@ -51,6 +51,9 @@ export function useGame() {
     setError(null);
     try {
       const result = await submitGameAnswer(gameId, payload);
+      if (!result.ok) {
+        setError(result.message || "שגיאה בשליחת התשובה.");
+      }
       // Automatically load the next question after answering
       await loadNextQuestion(gameId);
       return result;

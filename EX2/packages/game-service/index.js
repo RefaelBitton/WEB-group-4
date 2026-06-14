@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
 
+import Question from './models/Question.js';
+import GameSession from './models/GameSession.js';
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -36,12 +38,62 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to the Game Service API skeleton!" });
 });
 
+    // seed sample questions if empty
+    seedQuestions().catch(e => console.error('Seeding error', e.message));
 // Connect to MongoDB
 mongoose
   .connect(MONGO_URI)
   .then(() => {
     console.log("Connected to MongoDB successfully for Game Service");
   })
+const seedQuestions = async () => {
+  const count = await Question.countDocuments();
+  if (count > 0) return;
+
+  const samples = [
+    {
+      gameId: 'sentence-completion',
+      text: 'The cat is sitting ___ the table.',
+      options: [
+        { id: 'opt1', text: 'on' },
+        { id: 'opt2', text: 'in' },
+        { id: 'opt3', text: 'under' },
+        { id: 'opt4', text: 'above' },
+      ],
+      correctOptionId: 'opt1',
+      points: 10,
+    },
+    {
+      gameId: 'quick-translation',
+      text: 'כלב',
+      options: [
+        { id: 'opt1', text: 'Cat' },
+        { id: 'opt2', text: 'Dog' },
+        { id: 'opt3', text: 'Fish' },
+        { id: 'opt4', text: 'Bird' },
+      ],
+      correctOptionId: 'opt2',
+      points: 5,
+    },
+    {
+      gameId: 'image-recognition',
+      text: '',
+      imageUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+      options: [
+        { id: 'opt1', text: 'Cat' },
+        { id: 'opt2', text: 'Dog' },
+        { id: 'opt3', text: 'Fish' },
+        { id: 'opt4', text: 'Bird' },
+      ],
+      correctOptionId: 'opt1',
+      points: 8,
+    },
+  ];
+
+  await Question.insertMany(samples);
+  console.log('Seeded sample questions for game-service');
+};
+
   .catch((err) => {
     console.error("MongoDB connection error for Game Service:", err.message);
   });
