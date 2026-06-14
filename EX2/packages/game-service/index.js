@@ -46,6 +46,64 @@ mongoose
     console.error("MongoDB connection error for Game Service:", err.message);
   });
 
+// Sample in-memory games catalog and simple session generator
+const sampleGames = [
+  { id: "image-recognition", name: "משחק זיהוי תמונות" },
+  { id: "sentence-completion", name: "השלמת משפטים" },
+  { id: "quick-translation", name: "תרגום מהיר" },
+];
+
+app.get("/list", (req, res) => {
+  res.json({ games: sampleGames });
+});
+
+app.get("/:gameId/session", (req, res) => {
+  const { gameId } = req.params;
+
+  // Simple deterministic mock session per game type
+  const session = {
+    id: `q-${Math.random().toString(36).substr(2, 9)}`,
+    text:
+      gameId === "sentence-completion"
+        ? "The cat is sitting ___ the table."
+        : gameId === "quick-translation"
+        ? "כלב"
+        : "",
+    imageUrl:
+      gameId === "image-recognition"
+        ? "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+        : null,
+    options: [
+      { id: "opt1", text: gameId === "sentence-completion" ? "on" : gameId === "quick-translation" ? "Cat" : "Cat" },
+      { id: "opt2", text: gameId === "sentence-completion" ? "in" : gameId === "quick-translation" ? "Dog" : "Dog" },
+      { id: "opt3", text: gameId === "sentence-completion" ? "under" : gameId === "quick-translation" ? "Fish" : "Fish" },
+      { id: "opt4", text: gameId === "sentence-completion" ? "above" : gameId === "quick-translation" ? "Bird" : "Bird" },
+    ],
+  };
+
+  res.json(session);
+});
+
+app.post("/:gameId/answer", (req, res) => {
+  const { gameId } = req.params;
+  const payload = req.body || {};
+
+  // Basic correctness logic mirroring the mock answers used in frontend
+  let correct = false;
+  if (gameId === "sentence-completion") {
+    // assume opt1 ("on") is correct as in frontend mock
+    correct = payload.answerId === "opt1";
+  } else if (gameId === "quick-translation") {
+    // expect "Cat" -> opt1
+    correct = payload.answerId === "opt1";
+  } else if (gameId === "image-recognition") {
+    // arbitrary accept opt1 as correct for demo
+    correct = payload.answerId === "opt1";
+  }
+
+  res.json({ ok: true, correct, message: correct ? "נכון!" : "לא נכון, נסה שוב." });
+});
+
 app.listen(PORT, () => {
   console.log(`Game Service is running on port ${PORT}`);
 });
