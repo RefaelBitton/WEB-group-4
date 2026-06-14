@@ -6,6 +6,47 @@ import { Question } from "../models/Question.js";
 
 const DEFAULT_SESSION_KEY = "default-child-session";
 const activeSessions = new Map();
+const SESSION_TIMEOUT_MS = 15 * 60 * 1000;
+
+async function getActiveSession(gameId) {
+  if (!isDatabaseConnected()) {
+    return null;
+  }
+
+  const now = new Date();
+  let session = await GameSession.findOne({
+    sessionKey: DEFAULT_SESSION_KEY,
+    gameId,
+    status: "active",
+  });
+
+  if (session) {
+    const lastActivity = session.updatedAt || session.createdAt;
+    const timeElapsed = now - lastActivity;
+    if (timeElapsed > SESSION_TIMEOUT_MS) {
+      session.status = "completed";
+      session.length = Math.max(0, Math.round((lastActivity - session.createdAt) / 1000));
+      session.activeQuestionId = null;
+      await session.save();
+
+      session = new GameSession({
+        sessionKey: DEFAULT_SESSION_KEY,
+        gameId,
+        status: "active",
+      });
+      await session.save();
+    }
+  } else {
+    session = new GameSession({
+      sessionKey: DEFAULT_SESSION_KEY,
+      gameId,
+      status: "active",
+    });
+    await session.save();
+  }
+
+  return session;
+}
 
 function publicQuestion(question) {
   return {
@@ -57,16 +98,18 @@ async function saveActiveQuestion(gameId, questionId) {
     return;
   }
 
-  await GameSession.findOneAndUpdate(
-    { sessionKey: DEFAULT_SESSION_KEY, gameId },
-    { $set: { activeQuestionId: questionId } },
-    { new: true, upsert: true, setDefaultsOnInsert: true },
-  );
+  const session = await getActiveSession(gameId);
+  session.activeQuestionId = questionId;
+  await session.save();
 }
 
 async function getActiveQuestionId(gameId) {
   if (isDatabaseConnected()) {
-    const session = await GameSession.findOne({ sessionKey: DEFAULT_SESSION_KEY, gameId }).lean();
+    const session = await GameSession.findOne({
+      sessionKey: DEFAULT_SESSION_KEY,
+      gameId,
+      status: "active",
+    }).lean();
     if (session?.activeQuestionId) {
       return session.activeQuestionId;
     }
@@ -137,22 +180,40 @@ export async function submitAnswer(gameId, answerId) {
   const pointsEarned = correct ? question.points ?? 10 : 0;
 
   if (isDatabaseConnected()) {
-    await GameSession.findOneAndUpdate(
-      { sessionKey: DEFAULT_SESSION_KEY, gameId },
-      {
-        $inc: { score: pointsEarned },
-        $push: {
-          answeredQuestions: {
-            questionId: question.id,
-            answerId,
-            correct,
-            pointsEarned,
-          },
-        },
-        $set: { activeQuestionId: null },
-      },
-      { new: true, upsert: true, setDefaultsOnInsert: true },
-    );
+    const session = await GameSession.findOne({
+      sessionKey: DEFAULT_SESSION_KEY,
+      gameId,
+      status: "active",
+    });
+
+    if (!session) {
+      const error = new Error("No active session found.");
+      error.status = 404;
+      throw error;
+    }
+
+    const lastActivity = session.updatedAt || session.createdAt;
+    if (Date.now() - new Date(lastActivity) > SESSION_TIMEOUT_MS) {
+      session.status = "completed";
+      session.length = Math.max(0, Math.round((lastActivity - session.createdAt) / 1000));
+      session.activeQuestionId = null;
+      await session.save();
+
+      const error = new Error("Session expired due to inactivity.");
+      error.status = 409;
+      throw error;
+    }
+
+    session.score += pointsEarned;
+    session.answeredQuestions.push({
+      questionId: question.id,
+      answerId,
+      correct,
+      pointsEarned,
+    });
+    session.activeQuestionId = null;
+    session.length = Math.max(0, Math.round((new Date() - session.createdAt) / 1000));
+    await session.save();
   }
 
   activeSessions.delete(gameId);

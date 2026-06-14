@@ -10,6 +10,10 @@ Thumbs.db
 # env files
 .env
 .env.*
+
+# Superpowers
+docs/superpowers/
+
 # Ignore all .env files
 .env
 **/.env

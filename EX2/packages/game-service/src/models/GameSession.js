@@ -20,10 +20,15 @@ const gameSessionSchema = new Schema(
     activeQuestionId: { type: String, default: null },
     score: { type: Number, default: 0, min: 0 },
     answeredQuestions: { type: [answeredQuestionSchema], default: [] },
+    status: { type: String, enum: ["active", "completed"], default: "active", index: true },
+    length: { type: Number, default: 0 },
   },
   { timestamps: true },
 );
 
-gameSessionSchema.index({ sessionKey: 1, gameId: 1 }, { unique: true });
+gameSessionSchema.index(
+  { sessionKey: 1, gameId: 1 },
+  { unique: true, partialFilterExpression: { status: "active" } }
+);
 
 export const GameSession = mongoose.model("GameSession", gameSessionSchema);
