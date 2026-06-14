@@ -83,10 +83,10 @@
 - [x] Implement the Translation game component.
 
 ### Matan (Backend/Frontend - Integration)
-- [ ] Integrate Refael's completed `BotChat` component into the `ChildDashboard` view (or appropriate route) so it's accessible to users.
-- [ ] Connect the frontend game components to the API Gateway `/api/games` endpoints (`logic`).
-- [ ] Manage the state of active games (`data`) and handle transitions between questions.
-- [ ] Handle error states and loading screens (in Hebrew) during bot and game API calls.
+- [x] Integrate Refael's completed `BotChat` component into the `ChildDashboard` view (or appropriate route) so it's accessible to users.
+- [x] Connect the frontend game components to the API Gateway `/api/games` endpoints (`logic`).
+- [x] Manage the state of active games (`data`) and handle transitions between questions.
+- [x] Handle error states and loading screens (in Hebrew) during bot and game API calls.
 
 ---
 
