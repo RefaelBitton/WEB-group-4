@@ -71,10 +71,10 @@
 - [x] Render the bot's English response and highlight the Hebrew error corrections distinctively.
 
 ### Tal (Backend - Game Service)
-- [ ] Build the **Game Service** (Node.js/Express).
-- [ ] Create MongoDB schemas for `GameType`, `Question`, and `GameSession`.
-- [ ] Implement endpoints for fetching game data (Image Recognition, Sentence Completion, Translation).
-- [ ] Implement an endpoint to validate answers and calculate score/points. Route through API Gateway.
+- [x] Build the **Game Service** (Node.js/Express).
+- [x] Create MongoDB schemas for `GameType`, `Question`, and `GameSession`.
+- [x] Implement endpoints for fetching game data (Image Recognition, Sentence Completion, Translation).
+- [x] Implement an endpoint to validate answers and calculate score/points. Route through API Gateway.
 
 ### Dean (Frontend - Minigames UI)
 - [x] Build the Minigames Hub (`presentation`) (Hebrew menus/instructions).

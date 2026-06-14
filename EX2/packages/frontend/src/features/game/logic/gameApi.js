@@ -1,15 +1,23 @@
 const GAME_API = import.meta.env.VITE_API_URL ?? "/api/games";
 
+async function parseJsonResponse(response) {
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.error?.message || "Game API request failed");
+  }
+
+  return data;
+}
+
 export async function fetchGameList() {
   const response = await fetch(`${GAME_API}/list`);
-  if (!response.ok) throw new Error("Failed to fetch game list");
-  return response.json();
+  return parseJsonResponse(response);
 }
 
 export async function fetchGameSession(gameId) {
   const response = await fetch(`${GAME_API}/${gameId}/session`);
-  if (!response.ok) throw new Error("Failed to fetch game session");
-  return response.json();
+  return parseJsonResponse(response);
 }
 
 export async function submitGameAnswer(gameId, payload) {
@@ -18,7 +26,7 @@ export async function submitGameAnswer(gameId, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  if (!response.ok) throw new Error("Failed to submit game answer");
-  return response.json();
-}
 
+
+  return parseJsonResponse(response);
+}
