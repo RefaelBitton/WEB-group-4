@@ -4,8 +4,12 @@ import { ImageRecognition } from "./ImageRecognition.jsx";
 import { SentenceCompletion } from "./SentenceCompletion.jsx";
 import { QuickTranslation } from "./QuickTranslation.jsx";
 
+import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 export function GameHub() {
   const { games, loading, error, selectGame, selectedGame, currentQuestion, answerGame } = useGame();
+  const navigate = useNavigate();
 
   let content;
 
@@ -38,6 +42,15 @@ export function GameHub() {
 
     content = (
       <>
+        <div className="flex justify-start mb-8 w-full">
+          <button 
+            onClick={() => navigate('/child')}
+            className="flex items-center text-slate-600 hover:text-indigo-600 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-300 transition-all group"
+          >
+            <ArrowRight className="h-5 w-5 ml-2 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-semibold">חזור ללוח הראשי</span>
+          </button>
+        </div>
         <h2 className="text-5xl font-extrabold text-slate-900 mb-6 text-center tracking-tight">מרכז המשחקים</h2>
         <p className="text-2xl text-slate-500 mb-12 text-center">בחרו משחק לימוד כדי לתרגל אנגלית בצורה משחקית ומהנה.</p>
 
