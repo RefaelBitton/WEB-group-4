@@ -1,8 +1,7 @@
 import { isDatabaseConnected } from "../config/db.js";
-import { gameTypes, seedQuestions } from "../data/seedData.js";
+import { gameTypes } from "../data/seedData.js";
 import { GameSession } from "../models/GameSession.js";
 import { GameType } from "../models/GameType.js";
-import { Question } from "../models/Question.js";
 
 const DEFAULT_SESSION_KEY = "default-child-session";
 const activeSessions = new Map();
@@ -71,24 +70,26 @@ function assertKnownGame(gameId) {
 
 async function getQuestionPool(gameId) {
   if (isDatabaseConnected()) {
-    const dbQuestions = await Question.find({ gameId, active: true }).lean();
-    if (dbQuestions.length) {
-      return dbQuestions;
+    const game = await GameType.findOne({ id: gameId, active: true }).lean();
+    if (game && game.questions) {
+      return game.questions.filter((q) => q.active);
     }
   }
 
-  return seedQuestions.filter((question) => question.gameId === gameId);
+  const seedGame = gameTypes.find((game) => game.id === gameId);
+  return seedGame ? seedGame.questions.filter((q) => q.active) : [];
 }
 
-async function findQuestion(questionId) {
+async function findQuestion(gameId, questionId) {
   if (isDatabaseConnected()) {
-    const dbQuestion = await Question.findOne({ id: questionId, active: true }).lean();
-    if (dbQuestion) {
-      return dbQuestion;
+    const game = await GameType.findOne({ id: gameId, active: true }).lean();
+    if (game && game.questions) {
+      return game.questions.find((q) => q.id === questionId);
     }
   }
 
-  return seedQuestions.find((question) => question.id === questionId);
+  const seedGame = gameTypes.find((game) => game.id === gameId);
+  return seedGame ? seedGame.questions.find((q) => q.id === questionId) : null;
 }
 
 async function saveActiveQuestion(gameId, questionId) {
@@ -161,7 +162,7 @@ export async function submitAnswer(gameId, answerId) {
     throw error;
   }
 
-  const question = await findQuestion(activeQuestionId);
+  const question = await findQuestion(gameId, activeQuestionId);
   if (!question) {
     const error = new Error("Active question was not found.");
     error.status = 404;
