@@ -92,32 +92,39 @@
 
 ## Sprint 3: Progress Tracking, Reports, & Deployment (Week 3)
 
-**Goal:** Implement history tracking, gamification ("Grammar Hero"), parent reports, and finalize deployment.
+**Goal:** Implement history tracking, gamification ("Grammar Hero"), parent reports, WebSockets real-time updates, WebRTC peer-to-peer English practice, and finalize deployment.
 
-### Dev 1 (Backend - Reporting Service)
+### Oshri (Backend - Reporting Service & WebSockets)
 - [ ] Build the **Reporting Service** (Node.js/Express).
-- [ ] Create MongoDB schemas for `ActivityLog` and `Achievement`.
+- [ ] Create MongoDB schemas for `ActivityLog` and `Achievement` (supporting gamification milestones and badges).
 - [ ] Implement event listeners or endpoints to record chat activity and game scores into the history database.
 - [ ] Expose API Gateway endpoints for fetching aggregated progress data (subjects covered, success rates, time spent).
+- [ ] Integrate a WebSocket server (e.g., Socket.io or `ws`) in the API Gateway or Reporting Service to emit real-time child activity and achievement events.
 
-### Dev 2 (Backend - Gamification)
+### Rafael (Backend - Gamification & P2P Signaling)
 - [ ] Implement the "Grammar Hero" points system in the Reporting Service.
-- [ ] Create logic to award badges/points based on milestones (e.g., 5 correct sentences, 10 minutes played).
+- [ ] Create logic to award badges/points based on milestones (e.g., 5 correct sentences, 10 minutes played) and trigger achievement events.
 - [ ] Provide an API Gateway endpoint to fetch the child's current rank and point total.
+- [ ] Build the WebSockets-based WebRTC signaling server mechanism to negotiate direct connections between peer child clients (managing room creation, SDP exchange, and ICE candidates).
 
-### Dev 3 (Frontend - Parent Reports UI)
+### Tal (Frontend - Parent Reports UI & Real-Time Updates)
 - [ ] Build the Parent Report Dashboard (`presentation`) (Strictly Hebrew UI).
 - [ ] Create charts/visualizations for success rates, time spent, and subjects covered.
 - [ ] Connect the dashboard to the API Gateway `/api/reports` endpoints (`logic`).
 - [ ] Ensure data updates dynamically based on the selected child profile.
+- [ ] Integrate WebSocket event listeners in the Parent Portal (`logic`) to show real-time Hebrew toast notifications and dynamically update charts when their child earns a badge or completes a game.
 
-### Dev 4 (Frontend - Gamification UI & Polish)
+### Dean (Frontend - Gamification UI & P2P Arena)
 - [ ] Build the child-facing "Grammar Hero" profile view (Hebrew UI).
 - [ ] Implement animated pop-ups or notifications for when a child earns points/badges during chat or games.
 - [ ] Conduct a thorough review of the entire frontend to ensure **zero English** exists in the UI elements (buttons, nav, prompts).
+- [ ] Build the "English Practice Arena" UI (`presentation`) in Hebrew for peer-to-peer voice rooms.
+- [ ] Implement WebRTC Peer-to-Peer audio connection logic (`logic` and `data`) to exchange signaling info over WebSockets, stream voice directly between two child peers, and render dynamic prompt cards for conversation practice.
 
-### Dev 5 (QA, Polish & Final Deployment)
+### Matan (QA, Polish & Final Deployment)
 - [ ] Conduct End-to-End (E2E) testing on the API Gateway routing and microservice intercommunication.
 - [ ] Verify the vertical slicing folder structure in the frontend (`EX2`) adheres to the `logic`, `data`, `presentation` rule.
 - [ ] Perform final deployment checks on Vercel/Render for all services and the frontend.
 - [ ] Fix any outstanding UI bugs and optimize load times.
+- [ ] Configure STUN/TURN server details for WebRTC network traversal.
+- [ ] Conduct QA testing for WebSocket connection fallbacks and direct peer-to-peer audio transmission quality under restricted networks.

@@ -96,7 +96,7 @@ The game-related models are managed by the `game-service` and store game configu
 
 ### Collection Schema: `gametypes`
 
-Stores the different types of games available.
+Stores the different types of games available along with their configured questions.
 
 | Field Name | Type | Description | Constraints / Details |
 | :--- | :--- | :--- | :--- |
@@ -104,24 +104,24 @@ Stores the different types of games available.
 | `name` | `String` | Name of the game type | Required, trimmed |
 | `description`| `String` | Description of the game | Defaults to empty string, trimmed |
 | `active` | `Boolean` | Whether the game type is active | Defaults to `true`, indexed |
+| `questions` | `Array` | Array of questions for this game type | Structured subdocument list (see below) |
 
 ---
 
-### Collection Schema: `questions`
+#### Question Sub-Schema
 
-Stores questions belonging to a specific game.
+Each question in the `questions` array consists of:
 
 | Field Name | Type | Description | Constraints / Details |
 | :--- | :--- | :--- | :--- |
-| `id` | `String` | Unique question identifier | Required, unique, trimmed |
-| `gameId` | `String` | Link to the corresponding game | Required, indexed, trimmed, lowercase |
+| `id` | `String` | Unique question identifier | Required, trimmed |
 | `text` | `String` | Question prompt / text | Defaults to empty string, trimmed |
 | `imageUrl` | `String` | URL for question image (if any) | Defaults to `null` |
 | `options` | `Array` | List of answer choices | Structured list (see below). Must have >= 2 options and >= 1 correct option |
 | `points` | `Number` | Points rewarded on correct answer | Defaults to `10`, min `0` |
-| `active` | `Boolean` | Active status of the question | Defaults to `true`, indexed |
+| `active` | `Boolean` | Active status of the question | Defaults to `true` |
 
-#### Option Sub-Schema
+##### Option Sub-Schema
 
 Each option in the `options` array consists of:
 - `id`: `String` (Required, trimmed)
@@ -129,6 +129,7 @@ Each option in the `options` array consists of:
 - `isCorrect`: `Boolean` (Defaults to `false`)
 
 ---
+
 
 ### Collection Schema: `gamesessions`
 

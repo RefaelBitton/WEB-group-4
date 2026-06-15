@@ -56,3 +56,34 @@ features/feature-name/
 ```
 
 Transitioning to this standard structure can reduce directory boilerplate and align closer with modern React ecosystem practices.
+
+---
+
+## Current Project State & Remaining Tasks (Sprint 3)
+
+### Service Statuses
+1.  **`api-gateway/`**: Functional HTTP REST proxy gateway. Needs configuration for WebSocket hosting/proxying and WebRTC signaling room management.
+2.  **`user-service/`**: Complete with auth endpoints, JWT setup, and profile management schemas.
+3.  **`bot-service/`**: Complete AI chat service using Google Gemini SDK with evaluation and speech-to-text endpoints.
+4.  **`game-service/`**: Complete REST APIs for minigames fetching/answer validation.
+5.  **`reporting-service/`**: Skeleton setup. Needs full implementation of MongoDB models (`ActivityLog`, `Achievement`), progress calculations, points awarding, and webhook notifications triggers.
+6.  **`frontend/`**: Complete React/Vite router with UI slices for bot, user auth, base learning studio, and minigames. Needs parent real-time dashboard UI, custom WebSocket clients, and the P2P practice voice room interface.
+
+### Next Implementation Requirements
+
+#### 1. WebSocket Live Stream
+- Set up a WebSocket server in `packages/api-gateway/index.js` or `packages/reporting-service/index.js`.
+- Create a mechanism to broadcast child event progress (`ActivityLog`) and rewards (`Achievement`) to registered parent socket clients.
+- Connect the Parent Portal frontend to the WebSocket gateway to display live toast alerts in Hebrew and update charts on message receipt.
+
+#### 2. WebRTC Peer-to-Peer English Practice Arena
+- Build signaling endpoints on the WebSocket server (`join-room`, `sdp-offer`, `sdp-answer`, `ice-candidate`).
+- Build client-side WebRTC voice components in `packages/frontend/src/features/game` or a new feature slice, managing microphone permissions and media streams.
+- Set up dynamic learning prompt cards to display within the active call UI.
+- Establish STUN/TURN configurations and perform fallback checks under symmetric NAT networks.
+
+#### 3. Reporting and Gamification Engine
+- Complete MongoDB modeling for user logs and milestones inside `packages/reporting-service`.
+- Create calculations for child English level indicators and weekly summaries.
+- Ensure the gamification badges popup updates with visual flair and sounds on the child's screen.
+
