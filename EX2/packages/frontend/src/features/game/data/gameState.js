@@ -25,6 +25,7 @@ export function useGame() {
 
   async function loadNextQuestion(gameId) {
     setLoading(true);
+    setError(null);
     try {
       const q = await fetchGameSession(gameId);
       setCurrentQuestion(q);
@@ -51,9 +52,7 @@ export function useGame() {
     setError(null);
     try {
       const result = await submitGameAnswer(gameId, payload);
-      if (!result.ok) {
-        setError(result.message || "שגיאה בשליחת התשובה.");
-      }
+      
       // Automatically load the next question after answering
       await loadNextQuestion(gameId);
       return result;

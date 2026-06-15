@@ -72,12 +72,12 @@ async function getQuestionPool(gameId) {
   if (isDatabaseConnected()) {
     const game = await GameType.findOne({ id: gameId, active: true }).lean();
     if (game && game.questions) {
-      return game.questions.filter((q) => q.active);
+      return game.questions.filter((q) => q.active !== false);
     }
   }
 
   const seedGame = gameTypes.find((game) => game.id === gameId);
-  return seedGame ? seedGame.questions.filter((q) => q.active) : [];
+  return seedGame ? seedGame.questions.filter((q) => q.active !== false) : [];
 }
 
 async function findQuestion(gameId, questionId) {
