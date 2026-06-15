@@ -3,6 +3,8 @@ import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import http from "http";
+import { Server } from "socket.io";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -14,6 +16,13 @@ dotenv.config();
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Allows any origin, fine for local dev
+    methods: ["GET", "POST"]
+  }
+});
 const PORT = process.env.API_GATEWAY_PORT || process.env.PORT || 4000;
 
 // Middleware
@@ -74,8 +83,58 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 API Gateway is running on port ${PORT}`);
+// Socket.IO WebRTC Signaling and Gamification Logic
+io.on("connection", (socket) => {
+  console.log(`[Socket] User connected: ${socket.id}`);
+
+  // Gamification events
+  socket.on("gamification-event", (data) => {
+    // Re-broadcast gamification milestones (like Grammar Hero rank up)
+    io.emit("gamification-milestone", data);
+  });
+
+  // WebRTC Signaling: Join practice room
+  socket.on("join-room", (roomId, userId) => {
+    socket.join(roomId);
+    console.log(`[Socket] User ${userId} (${socket.id}) joined room ${roomId}`);
+    // Notify others in the room
+    socket.to(roomId).emit("user-joined", userId, socket.id);
+  });
+
+  // WebRTC Signaling: Offer
+  socket.on("offer", (payload) => {
+    // Payload should contain target (socket id of peer) and sdp offer
+    io.to(payload.target).emit("offer", {
+      sdp: payload.sdp,
+      callerId: socket.id
+    });
+  });
+
+  // WebRTC Signaling: Answer
+  socket.on("answer", (payload) => {
+    // Payload should contain target and sdp answer
+    io.to(payload.target).emit("answer", {
+      sdp: payload.sdp,
+      answererId: socket.id
+    });
+  });
+
+  // WebRTC Signaling: ICE Candidate
+  socket.on("ice-candidate", (payload) => {
+    io.to(payload.target).emit("ice-candidate", {
+      candidate: payload.candidate,
+      senderId: socket.id
+    });
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`[Socket] User disconnected: ${socket.id}`);
+  });
+});
+
+
+server.listen(PORT, () => {
+  console.log(`🚀 API Gateway & WebSocket Server is running on port ${PORT}`);
   console.log(`🔗 User Service Proxy target: ${USER_SERVICE_URL}`);
   console.log(`🔗 Bot Service Proxy target: ${BOT_SERVICE_URL}`);
   console.log(`🔗 Game Service Proxy target: ${GAME_SERVICE_URL}`);

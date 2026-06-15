@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
+import gamificationRoutes from "./routes/gamificationRoutes.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -35,6 +36,10 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the Reporting Service API skeleton!" });
 });
+
+// Gamification routes
+app.use("/gamification", gamificationRoutes);
+
 
 // Connect to MongoDB
 mongoose
