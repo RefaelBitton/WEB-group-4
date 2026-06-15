@@ -102,10 +102,10 @@
 - [ ] Integrate a WebSocket server (e.g., Socket.io or `ws`) in the API Gateway or Reporting Service to emit real-time child activity and achievement events.
 
 ### Rafael (Backend - Gamification & P2P Signaling)
-- [ ] Implement the "Grammar Hero" points system in the Reporting Service.
-- [ ] Create logic to award badges/points based on milestones (e.g., 5 correct sentences, 10 minutes played) and trigger achievement events.
-- [ ] Provide an API Gateway endpoint to fetch the child's current rank and point total.
-- [ ] Build the WebSockets-based WebRTC signaling server mechanism to negotiate direct connections between peer child clients (managing room creation, SDP exchange, and ICE candidates).
+- [x] Implement the "Grammar Hero" points system in the Reporting Service.
+- [x] Create logic to award badges/points based on milestones (e.g., 5 correct sentences, 10 minutes played) and trigger achievement events.
+- [x] Provide an API Gateway endpoint to fetch the child's current rank and point total.
+- [x] Build the WebSockets-based WebRTC signaling server mechanism to negotiate direct connections between peer child clients (managing room creation, SDP exchange, and ICE candidates).
 
 ### Tal (Frontend - Parent Reports UI & Real-Time Updates)
 - [ ] Build the Parent Report Dashboard (`presentation`) (Strictly Hebrew UI).
