@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { connectToDatabase, isDatabaseConnected } from "./config/db.js";
 import { GameSession } from "./models/GameSession.js";
-import { Question } from "./models/Question.js";
+import { GameType } from "./models/GameType.js";
 import { fetchNextQuestion, submitAnswer } from "./services/gameService.js";
 
 async function runTests() {
@@ -31,26 +31,62 @@ async function runTests() {
   await GameSession.deleteMany({ sessionKey: testSessionKey });
   console.log("🧹 Cleared old test sessions.");
 
-  // Make sure we have a question in DB or we seed it
+  // Make sure we have the GameType and question in DB or we seed it
   const gameId = "image-recognition";
-  let dbQuestion = await Question.findOne({ gameId, active: true });
-  if (!dbQuestion) {
-    console.log("🌱 Seeding a test question in the database...");
-    dbQuestion = new Question({
-      id: "test-question-img-1",
-      gameId,
-      text: "What is this?",
-      options: [
-        { id: "opt-dog", text: "dog", isCorrect: true },
-        { id: "opt-cat", text: "cat", isCorrect: false },
+  
+  // Clean up any remaining records from old Question collection to avoid pollution
+  try {
+    await mongoose.connection.db.dropCollection("questions");
+    console.log("🗑️ Dropped deprecated questions collection");
+  } catch (err) {
+    // Collection might not exist
+  }
+
+  let dbGameType = await GameType.findOne({ id: gameId });
+  if (!dbGameType) {
+    console.log("🌱 Seeding a test GameType with question in the database...");
+    dbGameType = new GameType({
+      id: gameId,
+      name: "Image Recognition Test",
+      description: "Test description",
+      questions: [
+        {
+          id: "test-question-img-1",
+          text: "What is this?",
+          options: [
+            { id: "opt-dog", text: "dog", isCorrect: true },
+            { id: "opt-cat", text: "cat", isCorrect: false },
+          ],
+          points: 15,
+          active: true,
+        }
       ],
-      points: 15,
       active: true,
     });
-    await dbQuestion.save();
+    await dbGameType.save();
+  } else {
+    // If GameType exists, verify it has questions seeded
+    const hasTestQ = dbGameType.questions && dbGameType.questions.some(q => q.id === "test-question-img-1");
+    if (!hasTestQ) {
+      console.log("🌱 Appending test question to existing GameType...");
+      dbGameType.questions = [
+        {
+          id: "test-question-img-1",
+          text: "What is this?",
+          options: [
+            { id: "opt-dog", text: "dog", isCorrect: true },
+            { id: "opt-cat", text: "cat", isCorrect: false },
+          ],
+          points: 15,
+          active: true,
+        }
+      ];
+      await dbGameType.save();
+    }
   }
-  const qId = dbQuestion.id;
-  const correctOptId = dbQuestion.options.find(o => o.isCorrect).id;
+
+  const qId = "test-question-img-1";
+  const correctOptId = "opt-dog";
 
   // --- Test Case 1: Session Initialization ---
   console.log("\n🧪 Test Case 1: Initializing a new session...");
