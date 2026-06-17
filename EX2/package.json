@@ -12,6 +12,7 @@
     "dev:bot-service": "npm run dev -w packages/bot-service",
     "dev:game-service": "npm run dev -w packages/game-service",
     "dev:reporting-service": "npm run dev -w packages/reporting-service",
+    "test:reporting": "node verify_reporting.js",
     "dev": "concurrently -k -n \"front,api,user,bot,game,rep\" -c \"cyan,green,yellow,blue,magenta,red\" \"npm run dev:frontend\" \"cd packages/api-gateway && node --watch index.js\" \"cd packages/user-service && node --watch index.js\" \"cd packages/bot-service && node --watch index.js\" \"cd packages/game-service && node --watch index.js\" \"cd packages/reporting-service && node --watch index.js\""
   },
   "devDependencies": {

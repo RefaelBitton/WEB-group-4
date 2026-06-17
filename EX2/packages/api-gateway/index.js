@@ -29,6 +29,16 @@ const PORT = process.env.API_GATEWAY_PORT || process.env.PORT || 4000;
 app.use(cors());
 app.use(morgan("dev"));
 
+// Endpoint to allow internal microservices to emit WebSocket events
+app.post("/api/socket/emit", express.json(), (req, res) => {
+  const { event, data } = req.body;
+  if (!event) {
+    return res.status(400).json({ error: "event is required" });
+  }
+  io.emit(event, data);
+  res.json({ success: true });
+});
+
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.json({
@@ -39,10 +49,10 @@ app.get("/health", (req, res) => {
 });
 
 // Configure targets for microservices (with fallbacks for local dev)
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3001";
-const BOT_SERVICE_URL = process.env.BOT_SERVICE_URL || "http://localhost:3002";
-const GAME_SERVICE_URL = process.env.GAME_SERVICE_URL || "http://localhost:3003";
-const REPORTING_SERVICE_URL = process.env.REPORTING_SERVICE_URL || "http://localhost:3004";
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://127.0.0.1:3001";
+const BOT_SERVICE_URL = process.env.BOT_SERVICE_URL || "http://127.0.0.1:3002";
+const GAME_SERVICE_URL = process.env.GAME_SERVICE_URL || "http://127.0.0.1:3003";
+const REPORTING_SERVICE_URL = process.env.REPORTING_SERVICE_URL || "http://127.0.0.1:3004";
 
 // Helper function to create standard proxy configurations
 const createServiceProxy = (targetUrl) => {
@@ -91,6 +101,11 @@ io.on("connection", (socket) => {
   socket.on("gamification-event", (data) => {
     // Re-broadcast gamification milestones (like Grammar Hero rank up)
     io.emit("gamification-milestone", data);
+  });
+
+  // Activity events
+  socket.on("activity-event", (data) => {
+    io.emit("child-activity", data);
   });
 
   // WebRTC Signaling: Join practice room

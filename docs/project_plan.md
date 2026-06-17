@@ -95,11 +95,11 @@
 **Goal:** Implement history tracking, gamification ("Grammar Hero"), parent reports, WebSockets real-time updates, WebRTC peer-to-peer English practice, and finalize deployment.
 
 ### Oshri (Backend - Reporting Service & WebSockets)
-- [ ] Build the **Reporting Service** (Node.js/Express).
-- [ ] Create MongoDB schemas for `ActivityLog` and `Achievement` (supporting gamification milestones and badges).
-- [ ] Implement event listeners or endpoints to record chat activity and game scores into the history database.
-- [ ] Expose API Gateway endpoints for fetching aggregated progress data (subjects covered, success rates, time spent).
-- [ ] Integrate a WebSocket server (e.g., Socket.io or `ws`) in the API Gateway or Reporting Service to emit real-time child activity and achievement events.
+- [x] Build the **Reporting Service** (Node.js/Express).
+- [x] Create MongoDB schemas for `ActivityLog` and `Achievement` (supporting gamification milestones and badges).
+- [x] Implement event listeners or endpoints to record chat activity and game scores into the history database.
+- [x] Expose API Gateway endpoints for fetching aggregated progress data (subjects covered, success rates, time spent).
+- [x] Integrate a WebSocket server (e.g., Socket.io or `ws`) in the API Gateway or Reporting Service to emit real-time child activity and achievement events.
 
 ### Rafael (Backend - Gamification & P2P Signaling)
 - [x] Implement the "Grammar Hero" points system in the Reporting Service.

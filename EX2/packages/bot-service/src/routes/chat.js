@@ -109,6 +109,30 @@ CRITICAL CONSTRAINT: You must adjust your vocabulary, syntax, complexity, and to
       content += `\n(Hebrew Correction: ${evaluation.correction})`;
     }
 
+    // Log chat activity to reporting service asynchronously
+    const reportingServiceUrl = process.env.REPORTING_SERVICE_URL || 'http://localhost:3004';
+    const userId = req.auth?.sub;
+    if (userId) {
+      fetch(`${reportingServiceUrl}/api/reports/activities/log`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          activityType: 'chat',
+          chatTopic: 'General English Practice',
+          successRate: evaluation.hasErrors ? 0 : 100,
+          timeSpent: 15, // estimated time spent per message exchange
+          details: {
+            message,
+            response: content,
+            hasErrors: evaluation.hasErrors
+          }
+        })
+      }).catch(err => {
+        console.error('Failed to log chat activity to reporting service:', err.message);
+      });
+    }
+
     res.json({
       role: 'bot',
       content: content,

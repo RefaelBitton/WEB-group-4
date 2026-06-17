@@ -68,3 +68,18 @@ export const addChild = async (childData, token) => {
   }
   return res.json();
 };
+
+export const getChildReport = async (childId, token) => {
+  const res = await fetch(`/api/reports/progress/${childId}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || 'שגיאה בטעינת דוח התקדמות');
+  }
+  return res.json();
+};
+

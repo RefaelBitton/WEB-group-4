@@ -1,5 +1,16 @@
 import mongoose from "mongoose";
 
+const answeredQuestionSchema = new mongoose.Schema(
+  {
+    questionId: { type: String, required: true },
+    answerId: { type: String, required: true },
+    correct: { type: Boolean, required: true },
+    pointsEarned: { type: Number, default: 0 },
+    answeredAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const gameSessionSchema = new mongoose.Schema(
   {
     sessionKey: {
@@ -26,10 +37,15 @@ const gameSessionSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    answeredQuestions: {
+      type: [answeredQuestionSchema],
+      default: [],
+    },
   },
   {
     timestamps: true,
     collection: "gamesessions",
+    strict: false,
   }
 );
 
