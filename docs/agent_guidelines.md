@@ -87,3 +87,6 @@ Transitioning to this standard structure can reduce directory boilerplate and al
 - Create calculations for child English level indicators and weekly summaries.
 - Ensure the gamification badges popup updates with visual flair and sounds on the child's screen.
 
+## Developer Setup & Database Seeding
+
+For details on how the MongoDB questions database is populated, and how developers/agents can seed or reset questions on other developer machines, see the [Database Seeding Guide](file:///home/deanza/Documents/semester%206/WEB/englishBotProject/WEB-group-4/docs/database_seeding_guide.md).

@@ -7,14 +7,14 @@ const DEFAULT_SESSION_KEY = "default-child-session";
 const activeSessions = new Map();
 const SESSION_TIMEOUT_MS = 15 * 60 * 1000;
 
-async function getActiveSession(gameId) {
+async function getActiveSession(gameId, sessionKey = DEFAULT_SESSION_KEY) {
   if (!isDatabaseConnected()) {
     return null;
   }
 
   const now = new Date();
   let session = await GameSession.findOne({
-    sessionKey: DEFAULT_SESSION_KEY,
+    sessionKey,
     gameId,
     status: "active",
   });
@@ -29,7 +29,7 @@ async function getActiveSession(gameId) {
       await session.save();
 
       session = new GameSession({
-        sessionKey: DEFAULT_SESSION_KEY,
+        sessionKey,
         gameId,
         status: "active",
       });
@@ -37,7 +37,7 @@ async function getActiveSession(gameId) {
     }
   } else {
     session = new GameSession({
-      sessionKey: DEFAULT_SESSION_KEY,
+      sessionKey,
       gameId,
       status: "active",
     });
@@ -92,22 +92,22 @@ async function findQuestion(gameId, questionId) {
   return seedGame ? seedGame.questions.find((q) => q.id === questionId) : null;
 }
 
-async function saveActiveQuestion(gameId, questionId) {
-  activeSessions.set(gameId, questionId);
+async function saveActiveQuestion(gameId, questionId, sessionKey = DEFAULT_SESSION_KEY) {
+  activeSessions.set(`${sessionKey}:${gameId}`, questionId);
 
   if (!isDatabaseConnected()) {
     return;
   }
 
-  const session = await getActiveSession(gameId);
+  const session = await getActiveSession(gameId, sessionKey);
   session.activeQuestionId = questionId;
   await session.save();
 }
 
-async function getActiveQuestionId(gameId) {
+async function getActiveQuestionId(gameId, sessionKey = DEFAULT_SESSION_KEY) {
   if (isDatabaseConnected()) {
     const session = await GameSession.findOne({
-      sessionKey: DEFAULT_SESSION_KEY,
+      sessionKey,
       gameId,
       status: "active",
     }).lean();
@@ -116,7 +116,7 @@ async function getActiveQuestionId(gameId) {
     }
   }
 
-  return activeSessions.get(gameId);
+  return activeSessions.get(`${sessionKey}:${gameId}`);
 }
 
 export async function listGames() {
@@ -130,7 +130,7 @@ export async function listGames() {
   return gameTypes;
 }
 
-export async function fetchNextQuestion(gameId) {
+export async function fetchNextQuestion(gameId, sessionKey = DEFAULT_SESSION_KEY) {
   assertKnownGame(gameId);
 
   const questions = await getQuestionPool(gameId);
@@ -141,12 +141,12 @@ export async function fetchNextQuestion(gameId) {
   }
 
   const question = pickRandom(questions);
-  await saveActiveQuestion(gameId, question.id);
+  await saveActiveQuestion(gameId, question.id, sessionKey);
 
   return publicQuestion(question);
 }
 
-export async function submitAnswer(gameId, answerId) {
+export async function submitAnswer(gameId, answerId, sessionKey = DEFAULT_SESSION_KEY) {
   assertKnownGame(gameId);
 
   if (!answerId) {
@@ -155,7 +155,7 @@ export async function submitAnswer(gameId, answerId) {
     throw error;
   }
 
-  const activeQuestionId = await getActiveQuestionId(gameId);
+  const activeQuestionId = await getActiveQuestionId(gameId, sessionKey);
   if (!activeQuestionId) {
     const error = new Error("No active question found. Fetch a game session before submitting an answer.");
     error.status = 409;
@@ -182,7 +182,7 @@ export async function submitAnswer(gameId, answerId) {
 
   if (isDatabaseConnected()) {
     const session = await GameSession.findOne({
-      sessionKey: DEFAULT_SESSION_KEY,
+      sessionKey,
       gameId,
       status: "active",
     });
@@ -217,7 +217,7 @@ export async function submitAnswer(gameId, answerId) {
     await session.save();
   }
 
-  activeSessions.delete(gameId);
+  activeSessions.delete(`${sessionKey}:${gameId}`);
 
   return {
     correct,
