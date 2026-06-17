@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchGameList, submitGameAnswer, fetchGameSession } from "../logic/gameApi.js";
+import { useUserStore } from "../../user/data/userStore.js";
+import { useGamificationStore } from "../../gamification/data/gamificationStore.js";
 
 export function useGame() {
   const [games, setGames] = useState([]);
@@ -53,6 +55,12 @@ export function useGame() {
     try {
       const result = await submitGameAnswer(gameId, payload);
       
+      // Award gamification points for game completion
+      const currentChildId = useUserStore.getState().user?._id;
+      if (currentChildId) {
+        useGamificationStore.getState().triggerAward(currentChildId, "game_completed");
+      }
+
       // Automatically load the next question after answering
       await loadNextQuestion(gameId);
       return result;

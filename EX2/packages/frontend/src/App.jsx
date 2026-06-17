@@ -6,6 +6,8 @@ import ParentPortal from './features/user/presentation/ParentPortal';
 import ChildDashboard from './features/user/presentation/ChildDashboard';
 import { BotChat } from './features/bot/presentation/BotChat';
 import { GameHub } from './features/game/presentation/GameHub';
+import GrammarHeroProfile from './features/gamification/presentation/GrammarHeroProfile';
+import EnglishArena from './features/arena/presentation/EnglishArena';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -40,6 +42,8 @@ export default function App() {
           <Route path="/child" element={<ChildDashboard />} />
           <Route path="/bot" element={<BotChat />} />
           <Route path="/games" element={<GameHub />} />
+          <Route path="/grammar-hero" element={<GrammarHeroProfile />} />
+          <Route path="/arena" element={<EnglishArena />} />
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>

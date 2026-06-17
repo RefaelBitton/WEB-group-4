@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { getConversationStarter, sendMessageToBot, transcribeAudio } from "../logic/botApi.js";
+import { useUserStore } from "../../user/data/userStore.js";
+import { useGamificationStore } from "../../gamification/data/gamificationStore.js";
 
 export function useBot() {
   const [messages, setMessages] = useState([]);
@@ -43,6 +45,12 @@ export function useBot() {
       const botText = response?.content || "הבוט עדיין לא ענה. נסה שוב";
       const botMessage = { role: "bot", text: botText };
       setMessages((prev) => [...prev, botMessage]);
+
+      // Award gamification points for chatting
+      const currentChildId = useUserStore.getState().user?._id;
+      if (currentChildId) {
+        useGamificationStore.getState().triggerAward(currentChildId, "correct_sentence");
+      }
     } catch (err) {
       setError("שגיאה בשליחת ההודעה. נסה שוב." );
     } finally {

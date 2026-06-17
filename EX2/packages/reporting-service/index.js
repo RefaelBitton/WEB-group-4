@@ -39,6 +39,7 @@ app.get("/", (req, res) => {
 
 // Gamification routes
 app.use("/gamification", gamificationRoutes);
+app.use("/api/reports/gamification", gamificationRoutes);
 
 
 // Connect to MongoDB

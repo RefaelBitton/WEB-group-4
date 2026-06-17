@@ -115,11 +115,11 @@
 - [ ] Integrate WebSocket event listeners in the Parent Portal (`logic`) to show real-time Hebrew toast notifications and dynamically update charts when their child earns a badge or completes a game.
 
 ### Dean (Frontend - Gamification UI & P2P Arena)
-- [ ] Build the child-facing "Grammar Hero" profile view (Hebrew UI).
-- [ ] Implement animated pop-ups or notifications for when a child earns points/badges during chat or games.
-- [ ] Conduct a thorough review of the entire frontend to ensure **zero English** exists in the UI elements (buttons, nav, prompts).
-- [ ] Build the "English Practice Arena" UI (`presentation`) in Hebrew for peer-to-peer voice rooms.
-- [ ] Implement WebRTC Peer-to-Peer audio connection logic (`logic` and `data`) to exchange signaling info over WebSockets, stream voice directly between two child peers, and render dynamic prompt cards for conversation practice.
+- [x] Build the child-facing "Grammar Hero" profile view (Hebrew UI).
+- [x] Implement animated pop-ups or notifications for when a child earns points/badges during chat or games.
+- [x] Conduct a thorough review of the entire frontend to ensure **zero English** exists in the UI elements (buttons, nav, prompts).
+- [x] Build the "English Practice Arena" UI (`presentation`) in Hebrew for peer-to-peer voice rooms.
+- [x] Implement WebRTC Peer-to-Peer audio connection logic (`logic` and `data`) to exchange signaling info over WebSockets, stream voice directly between two child peers, and render dynamic prompt cards for conversation practice.
 
 ### Matan (QA, Polish & Final Deployment)
 - [ ] Conduct End-to-End (E2E) testing on the API Gateway routing and microservice intercommunication.

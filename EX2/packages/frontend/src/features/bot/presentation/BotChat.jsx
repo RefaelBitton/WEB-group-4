@@ -60,7 +60,7 @@ export function BotChat() {
           <div className="flex flex-col">
             <h2 className="text-2xl font-black text-white tracking-wide flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-yellow-300" />
-              English Bot
+              בוט אנגלית
             </h2>
             <p className="text-indigo-100 text-sm mt-1 font-medium">המורה האישי שלך לאנגלית. תרגל איתי!</p>
           </div>
