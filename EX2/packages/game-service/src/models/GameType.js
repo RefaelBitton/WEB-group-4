@@ -16,6 +16,12 @@ const questionSchema = new Schema(
     id: { type: String, required: true, trim: true },
     text: { type: String, default: "", trim: true },
     imageUrl: { type: String, default: null },
+    difficulty: {
+      type: String,
+      enum: ["beginner", "basic", "intermediate"],
+      required: true,
+      default: "beginner"
+    },
     options: {
       type: [optionSchema],
       validate: {

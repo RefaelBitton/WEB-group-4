@@ -46,9 +46,9 @@ export function useBot() {
       const botMessage = { role: "bot", text: botText };
       setMessages((prev) => [...prev, botMessage]);
 
-      // Award gamification points for chatting
+      // Award gamification points only for a correct sentence (hasErrors === false)
       const currentChildId = useUserStore.getState().user?._id;
-      if (currentChildId) {
+      if (currentChildId && response?.evaluation && response.evaluation.hasErrors === false) {
         useGamificationStore.getState().triggerAward(currentChildId, "correct_sentence");
       }
     } catch (err) {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './features/user/presentation/Login';
 import Signup from './features/user/presentation/Signup';
@@ -8,6 +8,10 @@ import { BotChat } from './features/bot/presentation/BotChat';
 import { GameHub } from './features/game/presentation/GameHub';
 import GrammarHeroProfile from './features/gamification/presentation/GrammarHeroProfile';
 import EnglishArena from './features/arena/presentation/EnglishArena';
+
+import { useUserStore } from './features/user/data/userStore';
+import { useGamificationStore } from './features/gamification/data/gamificationStore';
+import MilestoneToast from './features/gamification/presentation/MilestoneToast';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -30,10 +34,29 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+function GlobalMilestoneNotifier() {
+  const { user } = useUserStore();
+  const { milestonePopup, clearMilestonePopup, initSocket, disconnectSocket } = useGamificationStore();
+
+  useEffect(() => {
+    if (user?._id && user.role === "child") {
+      initSocket(user._id);
+    } else {
+      disconnectSocket();
+    }
+    return () => {
+      disconnectSocket();
+    };
+  }, [user?._id, user?.role, initSocket, disconnectSocket]);
+
+  return <MilestoneToast popup={milestonePopup} onClose={clearMilestonePopup} />;
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
+        <GlobalMilestoneNotifier />
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />

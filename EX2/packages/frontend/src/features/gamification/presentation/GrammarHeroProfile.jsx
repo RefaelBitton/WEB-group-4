@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { useUserStore } from "../../user/data/userStore";
 import { useGamificationStore } from "../data/gamificationStore";
-import { ArrowRight, Trophy, Award, Activity, Play } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowRight, Trophy, Award, Activity, Play, GraduationCap } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import MilestoneToast from "./MilestoneToast";
 
 const RANK_MAP = {
@@ -10,6 +10,12 @@ const RANK_MAP = {
   "Intermediate Learner": "לומד בינוני",
   "Advanced Learner": "לומד מתקדם",
   "Grammar Hero": "גיבור דקדוק 🏆",
+};
+
+const LEVEL_MAP = {
+  beginner: "מתחיל 🌟",
+  basic: "בסיסי 🚀",
+  intermediate: "בינוני 🎓",
 };
 
 const ACHIEVEMENTS_DETAILS = [
@@ -22,6 +28,10 @@ export default function GrammarHeroProfile() {
   const { user } = useUserStore();
   const { points, rank, achievements, loading, error, loadStats, triggerAward, milestonePopup, clearMilestonePopup } = useGamificationStore();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Only show the developer simulator if ?debug=true query parameter is present
+  const showDebugPanel = location.search.includes("debug=true") || user?.role === "parent";
 
   useEffect(() => {
     if (user?._id) {
@@ -57,21 +67,21 @@ export default function GrammarHeroProfile() {
       <div className="w-full max-w-4xl flex justify-between items-center mb-10">
         <button
           onClick={() => navigate("/child")}
-          className="flex items-center text-slate-600 hover:text-indigo-600 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-300 transition-all group cursor-pointer"
+          className="flex items-center text-slate-600 hover:text-indigo-600 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-300 transition-all group cursor-pointer font-bold"
         >
           <ArrowRight className="h-5 w-5 ml-2 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-semibold">חזור ללוח הראשי</span>
+          <span>חזור ללוח הראשי</span>
         </button>
         <h1 className="text-4xl font-black text-slate-900">פרופיל גיבור הדקדוק</h1>
       </div>
 
       {error && (
-        <div className="w-full max-w-4xl p-4 bg-rose-50 border border-rose-100 text-rose-600 rounded-2xl text-center font-bold mb-6">
+        <div className="w-full max-w-4xl p-4 bg-rose-50 border border-rose-100 text-rose-600 rounded-2xl text-center font-bold mb-6 animate-pulse">
           {error}
         </div>
       )}
 
-      <div className="w-full max-w-4xl grid gap-8 grid-cols-1 md:grid-cols-3">
+      <div className="w-full max-w-4xl grid gap-8 grid-cols-1 md:grid-cols-2">
         {/* Card 1: Score & Rank */}
         <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm flex flex-col items-center text-center justify-between col-span-1">
           <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center text-amber-500 mb-4 shadow-inner">
@@ -89,8 +99,26 @@ export default function GrammarHeroProfile() {
           </div>
         </div>
 
-        {/* Card 2: Level Progression Meter */}
-        <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm col-span-2 flex flex-col justify-between">
+        {/* Card 2: Academic English Level */}
+        <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm flex flex-col items-center text-center justify-between col-span-1">
+          <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500 mb-4 shadow-inner">
+            <GraduationCap className="w-10 h-10" />
+          </div>
+          <div>
+            <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">רמת אנגלית אקדמית</span>
+            <h2 className="text-3xl font-extrabold text-indigo-800 mt-1">
+              {LEVEL_MAP[user?.englishLevel] || LEVEL_MAP["beginner"]}
+            </h2>
+          </div>
+          <div className="mt-6">
+            <span className="text-slate-500 font-bold text-md">
+              רמת לימוד מותאמת אישית
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3: Level Progression Meter */}
+        <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm md:col-span-2 flex flex-col justify-between">
           <h3 className="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
             <Activity className="text-indigo-500" />
             מד התקדמות הדרגה
@@ -107,11 +135,11 @@ export default function GrammarHeroProfile() {
               ></div>
             </div>
           </div>
-          <p className="text-slate-500 text-md mt-4">המשך לפתור שאלות ולדבר עם הבוט כדי לזכות בנקודות ולטפס בדרגות!</p>
+          <p className="text-slate-500 text-md mt-4 font-medium">המשך לפתור שאלות ולדבר עם הבוט כדי לזכות בנקודות ולטפס בדרגות!</p>
         </div>
 
-        {/* Card 3: Achievements list */}
-        <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm md:col-span-3">
+        {/* Card 4: Achievements list */}
+        <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm md:col-span-2">
           <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
             <Award className="text-amber-500" />
             תגי הישגים פתוחים
@@ -142,37 +170,39 @@ export default function GrammarHeroProfile() {
           </div>
         </div>
 
-        {/* Simulator Panel */}
-        <div className="bg-slate-100 border border-slate-200 rounded-[2.5rem] p-8 shadow-inner md:col-span-3">
-          <h3 className="text-xl font-bold text-slate-700 mb-4 flex items-center gap-2">
-            <Play className="text-slate-500" />
-            לוח בקרה למאמן (הדמיית צבירת הישגים)
-          </h3>
-          <p className="text-sm text-slate-500 mb-6">השתמש בלחצנים הבאים כדי לסמל אירועים המעניקים נקודות ולבדוק את חיבור ה-WebSocket בזמן אמת.</p>
-          <div className="flex flex-wrap gap-4">
-            <button
-              disabled={loading}
-              onClick={() => user?._id && triggerAward(user._id, "correct_sentence")}
-              className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
-            >
-              משפט נכון (+10 נקודות)
-            </button>
-            <button
-              disabled={loading}
-              onClick={() => user?._id && triggerAward(user._id, "game_completed")}
-              className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
-            >
-              השלמת משחק (+30 נקודות)
-            </button>
-            <button
-              disabled={loading}
-              onClick={() => user?._id && triggerAward(user._id, "play_10_mins")}
-              className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
-            >
-              תרגול 10 דקות (+50 נקודות)
-            </button>
+        {/* Simulator Panel (Only visible in debug mode or for parents) */}
+        {showDebugPanel && (
+          <div className="bg-slate-100 border border-slate-200 rounded-[2.5rem] p-8 shadow-inner md:col-span-2 animate-fade-in">
+            <h3 className="text-xl font-bold text-slate-700 mb-4 flex items-center gap-2">
+              <Play className="text-slate-500" />
+              לוח בקרה למאמן (הדמיית צבירת הישגים - למפתחים)
+            </h3>
+            <p className="text-sm text-slate-500 mb-6">השתמש בלחצנים הבאים כדי לסמל אירועים המעניקים נקודות ולבדוק את חיבור ה-WebSocket בזמן אמת.</p>
+            <div className="flex flex-wrap gap-4">
+              <button
+                disabled={loading}
+                onClick={() => user?._id && triggerAward(user._id, "correct_sentence")}
+                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
+              >
+                משפט נכון (+10 נקודות)
+              </button>
+              <button
+                disabled={loading}
+                onClick={() => user?._id && triggerAward(user._id, "game_completed")}
+                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
+              >
+                השלמת משחק (+30 נקודות)
+              </button>
+              <button
+                disabled={loading}
+                onClick={() => user?._id && triggerAward(user._id, "play_10_mins")}
+                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
+              >
+                תרגול 10 דקות (+50 נקודות)
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

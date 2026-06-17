@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { isDatabaseConnected } from "../config/db.js";
 import { gameTypes } from "../data/seedData.js";
 import { GameSession } from "../models/GameSession.js";
@@ -140,7 +141,26 @@ export async function fetchNextQuestion(gameId, sessionKey = DEFAULT_SESSION_KEY
     throw error;
   }
 
-  const question = pickRandom(questions);
+  // Determine user level from the DB if user-session is active
+  let childLevel = "beginner";
+  if (isDatabaseConnected() && sessionKey && mongoose.Types.ObjectId.isValid(sessionKey)) {
+    try {
+      const user = await mongoose.connection.db.collection("users").findOne({ _id: new mongoose.Types.ObjectId(sessionKey) });
+      if (user && user.englishLevel) {
+        childLevel = user.englishLevel;
+      }
+    } catch (err) {
+      console.error("Error fetching child level from users collection:", err);
+    }
+  }
+
+  // Filter the questions matching the child's english level. If none found, fallback to the entire pool.
+  let filteredQuestions = questions.filter((q) => q.difficulty === childLevel);
+  if (!filteredQuestions.length) {
+    filteredQuestions = questions;
+  }
+
+  const question = pickRandom(filteredQuestions);
   await saveActiveQuestion(gameId, question.id, sessionKey);
 
   return publicQuestion(question);

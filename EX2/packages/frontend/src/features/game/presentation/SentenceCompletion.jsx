@@ -1,6 +1,6 @@
 import React from "react";
 
-export function SentenceCompletion({ questionData, onAnswerSubmit, onBack }) {
+export function SentenceCompletion({ questionData, onAnswerSubmit, onBack, loading }) {
   if (!questionData) return <div className="text-center p-12">טוען נתונים...</div>;
 
   return (
@@ -19,7 +19,8 @@ export function SentenceCompletion({ questionData, onAnswerSubmit, onBack }) {
           <button 
             key={opt.id}
             onClick={() => onAnswerSubmit(opt.id)}
-            className="rounded-2xl border-2 border-slate-200 bg-slate-50 px-6 py-5 text-center text-2xl font-bold hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-all cursor-pointer"
+            disabled={loading}
+            className="rounded-2xl border-2 border-slate-200 bg-slate-50 px-6 py-5 text-center text-2xl font-bold hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {opt.text}
           </button>

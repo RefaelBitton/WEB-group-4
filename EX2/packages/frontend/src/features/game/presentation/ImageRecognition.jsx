@@ -1,6 +1,6 @@
 import React from "react";
 
-export function ImageRecognition({ questionData, onAnswerSubmit, onBack }) {
+export function ImageRecognition({ questionData, onAnswerSubmit, onBack, loading }) {
   if (!questionData) return <div className="text-center p-12">טוען נתונים...</div>;
 
   return (
@@ -8,9 +8,9 @@ export function ImageRecognition({ questionData, onAnswerSubmit, onBack }) {
       <h2 className="text-3xl font-bold text-slate-900 mb-4">משחק זיהוי תמונות</h2>
       <p className="text-xl text-slate-500 mb-8">לחצו על האפשרות שמתארת את התמונה בצורה הטובה ביותר.</p>
       
-      <div className="bg-slate-100 rounded-3xl h-64 w-full flex items-center justify-center mb-8 overflow-hidden">
+      <div className="bg-slate-50 border border-slate-100 rounded-3xl h-80 md:h-[28rem] w-full flex items-center justify-center mb-8 overflow-hidden">
         {questionData.imageUrl ? (
-          <img src={questionData.imageUrl} alt="Game visual" className="w-full h-full object-cover" />
+          <img src={questionData.imageUrl} alt="Game visual" className="max-w-full max-h-full object-contain" />
         ) : (
           <span className="text-slate-400 text-lg">תמונה תוצג כאן</span>
         )}
@@ -21,7 +21,8 @@ export function ImageRecognition({ questionData, onAnswerSubmit, onBack }) {
           <button 
             key={opt.id}
             onClick={() => onAnswerSubmit(opt.id)}
-            className="rounded-2xl border-2 border-slate-200 bg-slate-50 px-6 py-5 text-center text-xl font-bold hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 transition-all cursor-pointer"
+            disabled={loading}
+            className="rounded-2xl border-2 border-slate-200 bg-slate-50 px-6 py-5 text-center text-xl font-bold hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {opt.text}
           </button>

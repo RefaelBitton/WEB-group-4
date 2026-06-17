@@ -1,5 +1,6 @@
 import express from 'express';
 import Progress from '../models/Progress.js';
+import GameSession from '../models/GameSession.js';
 
 const router = express.Router();
 
@@ -9,6 +10,35 @@ const calculateRank = (points) => {
   if (points >= 500) return 'Advanced Learner';
   if (points >= 100) return 'Intermediate Learner';
   return 'Beginner';
+};
+
+// Helper to award automatic achievements (e.g. playing for 10 minutes)
+const checkAndAwardAutomaticAchievements = async (progress) => {
+  const userId = progress.userId.toString();
+  let updated = false;
+  let newAchievementAwarded = null;
+
+  // 1. Check PLAYED_10_MINS
+  if (!progress.achievements.includes('PLAYED_10_MINS')) {
+    // Find all sessions of the child
+    const sessions = await GameSession.find({ sessionKey: userId });
+    const totalPlayTimeSeconds = sessions.reduce((sum, s) => sum + (s.length || 0), 0);
+    
+    if (totalPlayTimeSeconds >= 600) { // 10 minutes = 600 seconds
+      progress.achievements.push('PLAYED_10_MINS');
+      progress.points += 50;
+      newAchievementAwarded = 'PLAYED_10_MINS';
+      updated = true;
+      console.log(`🏆 Automatically awarded PLAYED_10_MINS achievement to user ${userId} for ${totalPlayTimeSeconds} seconds of play.`);
+    }
+  }
+
+  if (updated) {
+    progress.rank = calculateRank(progress.points);
+    await progress.save();
+  }
+
+  return newAchievementAwarded;
 };
 
 // GET /api/reports/gamification/:userId - Fetch rank and points
@@ -21,6 +51,9 @@ router.get('/:userId', async (req, res) => {
       // Return default if not started yet
       return res.json({ points: 0, rank: 'Beginner', achievements: [] });
     }
+
+    // Automatically check and award any system achievements
+    await checkAndAwardAutomaticAchievements(progress);
     
     res.json({
       points: progress.points,
@@ -87,14 +120,19 @@ router.post('/award', async (req, res) => {
       progress.achievements.push(newAchievement);
     }
 
+    // Check and award automatic achievements (like PLAYED_10_MINS from database log)
+    const autoAward = await checkAndAwardAutomaticAchievements(progress);
+    let finalNewAchievement = newAchievement || autoAward;
+    let finalPointsAwarded = pointsToAward + (autoAward ? 50 : 0);
+
     await progress.save();
 
     res.json({
       success: true,
-      pointsAwarded: pointsToAward,
+      pointsAwarded: finalPointsAwarded,
       totalPoints: progress.points,
       newRank: rankUp ? newRank : null,
-      newAchievement: newAchievement,
+      newAchievement: finalNewAchievement,
       achievements: progress.achievements
     });
   } catch (error) {

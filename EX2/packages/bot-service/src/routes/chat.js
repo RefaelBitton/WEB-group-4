@@ -1,6 +1,32 @@
 import express from 'express';
-const router = express.Router();
+import mongoose from 'mongoose';
 import { getAIClient, SYSTEM_PROMPT, EVALUATION_SCHEMA } from '../utils/aiPromptSetup.js';
+import { authenticateToken } from '../middleware/authenticateToken.js';
+
+const router = express.Router();
+
+const LEVEL_MAPPING = {
+  beginner: 'A1 (Beginner)',
+  basic: 'A2 (Basic/Elementary)',
+  intermediate: 'B1 (Intermediate)'
+};
+
+async function getChildLevel(req) {
+  let childLevel = 'beginner';
+  const sessionKey = req.auth?.sub;
+  
+  if (sessionKey && mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(sessionKey)) {
+    try {
+      const user = await mongoose.connection.db.collection('users').findOne({ _id: new mongoose.Types.ObjectId(sessionKey) });
+      if (user && user.englishLevel) {
+        childLevel = user.englishLevel;
+      }
+    } catch (err) {
+      console.error('Error fetching child level from users collection in bot-service:', err);
+    }
+  }
+  return childLevel;
+}
 
 // Helper to format history for the Gemini API
 const formatHistory = (messages) => {
@@ -14,7 +40,7 @@ const formatHistory = (messages) => {
 
 // POST /api/bot/chat
 // Returns a single text response with Hebrew correction appended (for backward-compatibility)
-router.post('/chat', async (req, res) => {
+router.post('/chat', authenticateToken, async (req, res) => {
   try {
     const { message, history } = req.body;
     
@@ -32,10 +58,20 @@ router.post('/chat', async (req, res) => {
     // Format previous history
     const formattedHistory = formatHistory(history);
     
+    const levelKey = await getChildLevel(req);
+    const cefrLevel = LEVEL_MAPPING[levelKey] || 'A1 (Beginner)';
+
+    const dynamicInstruction = `${SYSTEM_PROMPT}
+    
+CRITICAL CONSTRAINT: You must adjust your vocabulary, syntax, complexity, and topics to precisely target the English level: **${cefrLevel}**.
+- If A1: Use only simple present tense, very common words (e.g. dog, cat, apple, like, run), and very short questions.
+- If A2: Use simple present and simple past tense, simple conjunctions, and slightly broader vocabulary.
+- If B1: Use a mix of tenses (including perfect tenses), more varied adjectives/adverbs, and discuss slightly more advanced everyday topics.`;
+
     const chatSession = ai.chats.create({
       model: 'gemini-3.1-flash-lite',
       config: {
-        systemInstruction: SYSTEM_PROMPT,
+        systemInstruction: dynamicInstruction,
         temperature: 0.7,
         responseMimeType: 'application/json',
         responseSchema: EVALUATION_SCHEMA
@@ -75,7 +111,11 @@ router.post('/chat', async (req, res) => {
 
     res.json({
       role: 'bot',
-      content: content
+      content: content,
+      evaluation: {
+        hasErrors: evaluation.hasErrors,
+        correction: evaluation.correction
+      }
     });
 
   } catch (error) {
@@ -86,7 +126,7 @@ router.post('/chat', async (req, res) => {
 
 // POST /api/bot/evaluate
 // Returns structured evaluation JSON (response, hasErrors, correction)
-router.post('/evaluate', async (req, res) => {
+router.post('/evaluate', authenticateToken, async (req, res) => {
   try {
     const { message, history } = req.body;
     
@@ -104,10 +144,20 @@ router.post('/evaluate', async (req, res) => {
     // Format previous history
     const formattedHistory = formatHistory(history);
     
+    const levelKey = await getChildLevel(req);
+    const cefrLevel = LEVEL_MAPPING[levelKey] || 'A1 (Beginner)';
+
+    const dynamicInstruction = `${SYSTEM_PROMPT}
+    
+CRITICAL CONSTRAINT: You must adjust your vocabulary, syntax, complexity, and topics to precisely target the English level: **${cefrLevel}**.
+- If A1: Use only simple present tense, very common words (e.g. dog, cat, apple, like, run), and very short questions.
+- If A2: Use simple present and simple past tense, simple conjunctions, and slightly broader vocabulary.
+- If B1: Use a mix of tenses (including perfect tenses), more varied adjectives/adverbs, and discuss slightly more advanced everyday topics.`;
+
     const chatSession = ai.chats.create({
       model: 'gemini-3.1-flash-lite',
       config: {
-        systemInstruction: SYSTEM_PROMPT,
+        systemInstruction: dynamicInstruction,
         temperature: 0.7,
         responseMimeType: 'application/json',
         responseSchema: EVALUATION_SCHEMA
@@ -210,9 +260,13 @@ router.post('/stt', handleTranscribe);
 
 // GET /api/bot/starter
 // Generates a random English conversation starter
-router.get('/starter', async (req, res) => {
+router.get('/starter', authenticateToken, async (req, res) => {
   try {
     const ai = getAIClient();
+    
+    const levelKey = await getChildLevel(req);
+    const cefrLevel = LEVEL_MAPPING[levelKey] || 'A1 (Beginner)';
+
     if (!ai) {
       // Fallback if AI isn't configured yet
       const fallbacks = [
@@ -224,10 +278,11 @@ router.get('/starter', async (req, res) => {
       return res.json({ starter: randomFallback });
     }
 
-    // Use AI to generate a dynamic starter
+    // Use AI to generate a dynamic starter matching the level
     const prompt = `
       Generate a very simple, fun conversation starter in English for a child (age 6-12).
       It should be just one or two short sentences asking a question.
+      The starter must target the CEFR level: **${cefrLevel}**.
       Do not include any Hebrew. Do not include quotes.
     `;
 

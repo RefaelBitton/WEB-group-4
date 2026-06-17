@@ -117,6 +117,7 @@ Each question in the `questions` array consists of:
 | `id` | `String` | Unique question identifier | Required, trimmed |
 | `text` | `String` | Question prompt / text | Defaults to empty string, trimmed |
 | `imageUrl` | `String` | URL for question image (if any) | Defaults to `null` |
+| `difficulty`| `String` | Question difficulty level | Required. Must be `"beginner"`, `"basic"`, or `"intermediate"` |
 | `options` | `Array` | List of answer choices | Structured list (see below). Must have >= 2 options and >= 1 correct option |
 | `points` | `Number` | Points rewarded on correct answer | Defaults to `10`, min `0` |
 | `active` | `Boolean` | Active status of the question | Defaults to `true` |
