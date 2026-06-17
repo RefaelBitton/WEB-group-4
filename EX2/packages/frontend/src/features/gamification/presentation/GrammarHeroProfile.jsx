@@ -21,7 +21,12 @@ const LEVEL_MAP = {
 const ACHIEVEMENTS_DETAILS = [
   { id: "FIRST_CORRECT_SENTENCE", title: "המשפט הראשון שלי", desc: "כתבת משפט נכון ראשון בצ'אט" },
   { id: "FIRST_GAME_COMPLETED", title: "אלוף המשחקים", desc: "סיימת בהצלחה משחק לימודי ראשון" },
-  { id: "PLAYED_10_MINS", title: "מתאמן מתמיד", desc: "תרגלת אנגלית במשך 10 דקות לפחות" }
+  { id: "PLAYED_10_MINS", title: "מתאמן מתמיד", desc: "תרגלת אנגלית במשך 10 דקות לפחות" },
+  { id: "ARENA_CHALLENGER", title: "לוחם זירת השיחה", desc: "הצטרפת לזירת האימון לדיבור חופשי" },
+  { id: "CHAT_MASTER", title: "אלוף השיח", desc: "כתבת בהצלחה 5 משפטים נכונים בצ'אט" },
+  { id: "VOCABULARY_EXPLORER", title: "חוקר אוצר המילים", desc: "סיימת בהצלחה 3 משחקים לימודיים" },
+  { id: "POINT_CENTURY", title: "מאה ראשונה!", desc: "צברת 100 נקודות והפכת ללומד בינוני" },
+  { id: "HALF_MILLENNIUM", title: "חצי דרך לפסגה!", desc: "צברת 500 נקודות והפכת ללומד מתקדם" }
 ];
 
 export default function GrammarHeroProfile() {
@@ -182,23 +187,44 @@ export default function GrammarHeroProfile() {
               <button
                 disabled={loading}
                 onClick={() => user?._id && triggerAward(user._id, "correct_sentence")}
-                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
+                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer animate-fade-in"
               >
                 משפט נכון (+10 נקודות)
               </button>
               <button
                 disabled={loading}
                 onClick={() => user?._id && triggerAward(user._id, "game_completed")}
-                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
+                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer animate-fade-in"
               >
                 השלמת משחק (+30 נקודות)
               </button>
               <button
                 disabled={loading}
                 onClick={() => user?._id && triggerAward(user._id, "play_10_mins")}
-                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
+                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer animate-fade-in"
               >
                 תרגול 10 דקות (+50 נקודות)
+              </button>
+              <button
+                disabled={loading}
+                onClick={() => user?._id && triggerAward(user._id, "join_arena")}
+                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer animate-fade-in"
+              >
+                כניסה לזירה (+15 נקודות)
+              </button>
+              <button
+                disabled={loading}
+                onClick={() => user?._id && triggerAward(user._id, "chat_streak_5")}
+                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer animate-fade-in"
+              >
+                5 משפטים נכונים (+25 נקודות)
+              </button>
+              <button
+                disabled={loading}
+                onClick={() => user?._id && triggerAward(user._id, "three_games_completed")}
+                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer animate-fade-in"
+              >
+                סיום 3 משחקים (+40 נקודות)
               </button>
             </div>
           </div>

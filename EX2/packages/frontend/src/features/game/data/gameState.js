@@ -75,6 +75,13 @@ export function useGame() {
         const currentChildId = useUserStore.getState().user?._id;
         if (currentChildId) {
           await useGamificationStore.getState().triggerAward(currentChildId, "game_completed");
+
+          // Keep track of completed games in the session to award VOCABULARY_EXPLORER
+          const completedCount = parseInt(localStorage.getItem("completed_games_count") || "0") + 1;
+          localStorage.setItem("completed_games_count", completedCount.toString());
+          if (completedCount === 3) {
+            await useGamificationStore.getState().triggerAward(currentChildId, "three_games_completed");
+          }
         }
       } else {
         // Automatically load the next question after answering

@@ -41,6 +41,17 @@ EX2/packages/frontend/src/features/
    - **WebSocket Integration**: Initializes connection to `http://localhost:4000` (API Gateway) using `socket.io-client`. Listens to the `gamification-milestone` event to dynamically trigger milestone toast notifications in the UI when the current child levels up or unlocks an achievement.
    - **Simulation Helper**: Includes a function that triggers `awardPoints` via HTTP and then emits a socket message (`gamification-event`) so the API Gateway can broadcast it to any active parent dashboard or the current child dashboard instantly.
 
+### List of Unlocked Achievements & Hebrew Translations
+The gamification system handles the following achievements mapping:
+- `FIRST_CORRECT_SENTENCE` -> **המשפט הנכון הראשון שלי! ✍️**
+- `FIRST_GAME_COMPLETED` -> **אלוף המשחקים הראשון! 🎮**
+- `PLAYED_10_MINS` -> **10 דקות של אימון! ⏱️**
+- `ARENA_CHALLENGER` -> **לוחם זירת השיחה! 🎙️** (עבור הצטרפות לחדר ב arena)
+- `CHAT_MASTER` -> **אלוף השיח! 💬** (עבור 5 משפטים תקינים)
+- `VOCABULARY_EXPLORER` -> **חוקר אוצר המילים! 🔍** (עבור השלמת 3 משחקים)
+- `POINT_CENTURY` -> **מאה ראשונה! 💯** (עבור צבירת 100 נקודות)
+- `HALF_MILLENNIUM` -> **חצי דרך לפסגה! 🚀** (עבור צבירת 500 נקודות)
+
 ### UI Specifications (`GrammarHeroProfile.jsx` & `MilestoneToast.jsx`)
 - **Hebrew UI**: Strict Hebrew texts. Points, level metrics, buttons, back navigation, and control instructions are fully localized.
 - **Vibrant Game Aesthetic**: Designed with a glassmorphism container, gradient cards, smooth point-to-next-level progression bar, and a grid of medals showing locked/unlocked states with hover transitions.

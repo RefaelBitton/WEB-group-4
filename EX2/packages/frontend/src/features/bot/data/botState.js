@@ -50,6 +50,13 @@ export function useBot() {
       const currentChildId = useUserStore.getState().user?._id;
       if (currentChildId && response?.evaluation && response.evaluation.hasErrors === false) {
         useGamificationStore.getState().triggerAward(currentChildId, "correct_sentence");
+
+        // Keep track of correct sentences in the current session
+        const correctCount = parseInt(sessionStorage.getItem("correct_sentences_count") || "0") + 1;
+        sessionStorage.setItem("correct_sentences_count", correctCount.toString());
+        if (correctCount === 5) {
+          useGamificationStore.getState().triggerAward(currentChildId, "chat_streak_5");
+        }
       }
     } catch (err) {
       setError("שגיאה בשליחת ההודעה. נסה שוב." );

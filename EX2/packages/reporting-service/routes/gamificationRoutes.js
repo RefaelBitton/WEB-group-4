@@ -102,11 +102,38 @@ router.post('/award', async (req, res) => {
           newAchievement = 'FIRST_GAME_COMPLETED';
         }
         break;
+      case 'join_arena':
+        pointsToAward = 15;
+        if (!progress.achievements.includes('ARENA_CHALLENGER')) {
+          newAchievement = 'ARENA_CHALLENGER';
+        }
+        break;
+      case 'chat_streak_5':
+        pointsToAward = 25;
+        if (!progress.achievements.includes('CHAT_MASTER')) {
+          newAchievement = 'CHAT_MASTER';
+        }
+        break;
+      case 'three_games_completed':
+        pointsToAward = 40;
+        if (!progress.achievements.includes('VOCABULARY_EXPLORER')) {
+          newAchievement = 'VOCABULARY_EXPLORER';
+        }
+        break;
       default:
         pointsToAward = 5; // default catch-all
     }
 
     progress.points += pointsToAward;
+
+    // Check for automatic score-based achievements
+    if (progress.points >= 100 && !progress.achievements.includes('POINT_CENTURY')) {
+      progress.achievements.push('POINT_CENTURY');
+      newAchievement = 'POINT_CENTURY';
+    } else if (progress.points >= 500 && !progress.achievements.includes('HALF_MILLENNIUM')) {
+      progress.achievements.push('HALF_MILLENNIUM');
+      newAchievement = 'HALF_MILLENNIUM';
+    }
     
     // Update Rank
     const newRank = calculateRank(progress.points);
@@ -116,7 +143,7 @@ router.post('/award', async (req, res) => {
       rankUp = true;
     }
 
-    if (newAchievement) {
+    if (newAchievement && !progress.achievements.includes(newAchievement)) {
       progress.achievements.push(newAchievement);
     }
 

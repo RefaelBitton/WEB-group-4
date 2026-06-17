@@ -5,6 +5,11 @@ const BADGE_MAP = {
   FIRST_CORRECT_SENTENCE: "המשפט הנכון הראשון שלי! ✍️",
   FIRST_GAME_COMPLETED: "אלוף המשחקים הראשון! 🎮",
   PLAYED_10_MINS: "10 דקות של אימון! ⏱️",
+  ARENA_CHALLENGER: "לוחם זירת השיחה! 🎙️",
+  CHAT_MASTER: "אלוף השיח! 💬",
+  VOCABULARY_EXPLORER: "חוקר אוצר המילים! 🔍",
+  POINT_CENTURY: "מאה ראשונה! 💯",
+  HALF_MILLENNIUM: "חצי דרך לפסגה! 🚀",
 };
 
 const RANK_MAP = {

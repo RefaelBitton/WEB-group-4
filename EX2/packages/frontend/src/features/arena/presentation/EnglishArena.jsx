@@ -3,6 +3,7 @@ import { useUserStore } from "../../user/data/userStore";
 import { useArenaStore } from "../data/arenaStore";
 import { ArrowRight, Mic, MicOff, PhoneOff, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useGamificationStore } from "../../gamification/data/gamificationStore";
 
 const PROMPT_CARDS = [
   "What is your favorite animal and why?",
@@ -39,6 +40,7 @@ export default function EnglishArena() {
   const handleJoinGeneral = () => {
     if (user?._id) {
       joinRoom("arena-room-1", user._id);
+      useGamificationStore.getState().triggerAward(user._id, "join_arena");
     }
   };
 
@@ -46,6 +48,7 @@ export default function EnglishArena() {
     e.preventDefault();
     if (customRoomId.trim() && user?._id) {
       joinRoom(customRoomId.trim(), user._id);
+      useGamificationStore.getState().triggerAward(user._id, "join_arena");
     }
   };
 
