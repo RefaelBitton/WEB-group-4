@@ -1,8 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useUserStore } from '../data/userStore';
 import { useNavigate } from 'react-router-dom';
-import { getChildren, addChild, getChildReport } from '../logic/api';
-import { LogOut, BookOpen, Star, Clock, Activity, X, TrendingUp, Award, MessageCircle, Gamepad2, Calendar, AlertCircle } from 'lucide-react';
+import { getChildren, addChild, getChildReport, getChildGamification } from '../logic/api';
+import { createParentReportSocket } from '../logic/reportSocket';
+import { LogOut, BookOpen, Star, Clock, Activity, X, TrendingUp, Award, MessageCircle, Gamepad2, Calendar, AlertCircle, Bell, Wifi, WifiOff } from 'lucide-react';
+
+const eventTypeLabels = {
+  chat: 'שיחת צ׳אט',
+  game: 'משחק לימודי',
+  arena: 'זירת שיחה',
+};
+
+const achievementLabels = {
+  FIRST_CORRECT_SENTENCE: 'המשפט הראשון שלי',
+  FIRST_GAME_COMPLETED: 'אלוף המשחקים',
+  PLAYED_10_MINS: 'מתאמן מתמיד',
+  ARENA_CHALLENGER: 'לוחם זירת השיחה',
+  CHAT_MASTER: 'אלוף השיחה',
+  VOCABULARY_EXPLORER: 'חוקר אוצר המילים',
+  POINT_CENTURY: 'מאה ראשונה',
+  HALF_MILLENNIUM: 'חצי דרך לפסגה',
+};
+
+const buildActivityToast = (childName, data) => {
+  const activity = eventTypeLabels[data?.activityType] || 'פעילות חדשה';
+  if (data?.activityType === 'game') {
+    return `${childName} השלים/ה ${activity}${data.gameId ? `: ${data.gameId}` : ''}`;
+  }
+  return `${childName} ביצע/ה ${activity}`;
+};
+
+const buildMilestoneToast = (childName, data) => {
+  if (data?.newRank) {
+    return `${childName} עלה/תה לרמה חדשה: ${data.newRank}`;
+  }
+  const achievement = achievementLabels[data?.newAchievement] || data?.newAchievement || 'הישג חדש';
+  return `${childName} קיבל/ה הישג חדש: ${achievement}`;
+};
 
 export default function ParentPortal() {
   const { user, token, logout } = useUserStore();
@@ -26,6 +60,35 @@ export default function ParentPortal() {
   const [reportLoading, setReportLoading] = useState(false);
   const [reportError, setReportError] = useState('');
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [liveToasts, setLiveToasts] = useState([]);
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const [lastLiveUpdate, setLastLiveUpdate] = useState(null);
+
+  const childNameById = useMemo(() => {
+    return children.reduce((map, child) => {
+      map[child._id] = child.name;
+      return map;
+    }, {});
+  }, [children]);
+
+  const pushLiveToast = useCallback((message, tone = 'info') => {
+    const id = `${Date.now()}-${Math.random()}`;
+    setLiveToasts((current) => [...current.slice(-2), { id, message, tone }]);
+    window.setTimeout(() => {
+      setLiveToasts((current) => current.filter((toast) => toast.id !== id));
+    }, 5500);
+  }, []);
+
+  const refreshSelectedReport = useCallback(async (childId = selectedChild?._id) => {
+    if (!childId || !token) return;
+    try {
+      const data = await getChildReport(childId, token);
+      setReportData(data);
+      setReportError('');
+    } catch (err) {
+      setReportError(err.message || 'שגיאה בעדכון דוח ההתקדמות.');
+    }
+  }, [selectedChild?._id, token]);
 
   const handleOpenReport = async (child) => {
     setSelectedChild(child);
@@ -43,7 +106,7 @@ export default function ParentPortal() {
     }
   };
 
-  const loadChildrenData = async () => {
+  const loadChildrenData = useCallback(async () => {
     try {
       const data = await getChildren(token);
       const childList = data.children || [];
@@ -51,15 +114,10 @@ export default function ParentPortal() {
       const enrichedChildren = await Promise.all(
         childList.map(async (child) => {
           try {
-            const reportRes = await fetch(`/api/reports/progress/${child._id}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const report = reportRes.ok ? await reportRes.json() : null;
-
-            const gameRes = await fetch(`/api/reports/gamification/${child._id}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const game = gameRes.ok ? await gameRes.json() : null;
+            const [report, game] = await Promise.all([
+              getChildReport(child._id, token).catch(() => null),
+              getChildGamification(child._id, token).catch(() => null),
+            ]);
 
             return {
               ...child,
@@ -76,7 +134,7 @@ export default function ParentPortal() {
     } catch (err) {
       console.error("Failed to load children", err);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     if (!token) {
@@ -85,7 +143,42 @@ export default function ParentPortal() {
     }
 
     loadChildrenData();
-  }, [token, navigate]);
+  }, [token, navigate, loadChildrenData]);
+
+  useEffect(() => {
+    if (!token || children.length === 0) return;
+
+    const childIds = new Set(children.map((child) => child._id));
+
+    const handleRelevantUpdate = async (userId) => {
+      setLastLiveUpdate(new Date());
+      await loadChildrenData();
+      if (selectedChild?._id === userId) {
+        await refreshSelectedReport(userId);
+      }
+    };
+
+    const socket = createParentReportSocket({
+      onConnectChange: setIsSocketConnected,
+      onActivity: (data) => {
+        if (!data?.userId || !childIds.has(data.userId)) return;
+        const childName = childNameById[data.userId] || 'הילד';
+        pushLiveToast(buildActivityToast(childName, data), 'activity');
+        handleRelevantUpdate(data.userId);
+      },
+      onMilestone: (data) => {
+        if (!data?.userId || !childIds.has(data.userId)) return;
+        const childName = childNameById[data.userId] || 'הילד';
+        pushLiveToast(buildMilestoneToast(childName, data), 'milestone');
+        handleRelevantUpdate(data.userId);
+      },
+    });
+
+    return () => {
+      socket.disconnect();
+      setIsSocketConnected(false);
+    };
+  }, [token, children, childNameById, selectedChild?._id, loadChildrenData, refreshSelectedReport, pushLiveToast]);
 
   const handleLogout = () => {
     logout();
@@ -150,6 +243,10 @@ export default function ParentPortal() {
             </div>
             <div className="flex items-center">
               <span className="ml-4 text-gray-700">שלום, {user?.name || 'הורה'}</span>
+              <div className={`hidden sm:flex items-center gap-1.5 ml-4 px-3 py-1 rounded-full text-xs font-bold ${isSocketConnected ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}>
+                {isSocketConnected ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
+                {isSocketConnected ? 'עדכונים חיים' : 'ממתין לחיבור'}
+              </div>
               <button
                 onClick={handleLogout}
                 className="flex items-center text-red-600 hover:text-red-800 transition-colors"
@@ -162,10 +259,36 @@ export default function ParentPortal() {
         </div>
       </nav>
 
+      <div className="fixed top-20 left-4 z-[60] space-y-3 w-[min(22rem,calc(100vw-2rem))]">
+        {liveToasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`bg-white border shadow-xl rounded-2xl p-4 flex items-start gap-3 text-right ${
+              toast.tone === 'milestone' ? 'border-amber-200' : 'border-indigo-200'
+            }`}
+          >
+            <div className={`h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+              toast.tone === 'milestone' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'
+            }`}>
+              {toast.tone === 'milestone' ? <Award className="h-5 w-5" /> : <Bell className="h-5 w-5" />}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-black text-gray-900">{toast.tone === 'milestone' ? 'הישג חדש' : 'פעילות חדשה'}</p>
+              <p className="text-sm text-gray-600 leading-relaxed mt-0.5">{toast.message}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900">הילדים שלי</h2>
           <p className="text-gray-600">עקבו אחר התקדמות הלמידה של ילדיכם</p>
+          {lastLiveUpdate && (
+            <p className="text-xs text-gray-400 mt-2">
+              עדכון חי אחרון: {lastLiveUpdate.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -408,6 +531,33 @@ export default function ParentPortal() {
                     </div>
                   </div>
 
+                  <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <h4 className="font-bold text-gray-900 mb-4 text-base flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                      מדדי הצלחה
+                    </h4>
+                    <div className="space-y-4">
+                      {[
+                        { label: 'הצלחה כוללת', value: reportData.successRates?.overall || 0, color: 'bg-green-500' },
+                        { label: 'שיחות צ׳אט', value: reportData.successRates?.chat || 0, color: 'bg-purple-500' },
+                        { label: 'משחקים', value: reportData.successRates?.game || 0, color: 'bg-amber-500' },
+                      ].map((metric) => (
+                        <div key={metric.label}>
+                          <div className="flex justify-between text-sm font-bold text-gray-700 mb-1">
+                            <span>{metric.label}</span>
+                            <span>{metric.value}%</span>
+                          </div>
+                          <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                            <div
+                              className={`${metric.color} h-full rounded-full transition-all duration-500`}
+                              style={{ width: `${Math.min(100, metric.value)}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Time breakdown & Subjects */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Time Breakdown details */}
@@ -467,13 +617,25 @@ export default function ParentPortal() {
                       {(!reportData.subjectsCovered || reportData.subjectsCovered.length === 0) ? (
                         <p className="text-gray-500 text-xs italic text-center py-4">אין עדיין נושאים מתועדים</p>
                       ) : (
-                        <div className="flex flex-wrap gap-2">
-                          {reportData.subjectsCovered.map((sub, idx) => (
-                            <span key={idx} className="px-3 py-1.5 bg-white border border-gray-200 text-gray-800 text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-sm">
-                              <span className="font-bold text-indigo-600">{sub.subject}</span>
-                              <span className="text-gray-400">({sub.count})</span>
-                            </span>
-                          ))}
+                        <div className="space-y-3">
+                          {reportData.subjectsCovered.map((sub, idx) => {
+                            const maxCount = Math.max(...reportData.subjectsCovered.map((item) => item.count || 0), 1);
+                            const width = Math.max(8, Math.round(((sub.count || 0) / maxCount) * 100));
+                            return (
+                              <div key={idx}>
+                                <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1">
+                                  <span className="truncate max-w-[70%]">{sub.subject}</span>
+                                  <span>{sub.count}</span>
+                                </div>
+                                <div className="w-full bg-white h-2.5 rounded-full overflow-hidden border border-gray-100">
+                                  <div
+                                    className="bg-indigo-500 h-full rounded-full transition-all duration-500"
+                                    style={{ width: `${width}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>

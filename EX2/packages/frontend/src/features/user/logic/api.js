@@ -83,3 +83,17 @@ export const getChildReport = async (childId, token) => {
   return res.json();
 };
 
+export const getChildGamification = async (childId, token) => {
+  const res = await fetch(`/api/reports/gamification/${childId}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || 'שגיאה בטעינת נתוני ההישגים');
+  }
+  return res.json();
+};
+

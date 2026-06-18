@@ -108,11 +108,11 @@
 - [x] Build the WebSockets-based WebRTC signaling server mechanism to negotiate direct connections between peer child clients (managing room creation, SDP exchange, and ICE candidates).
 
 ### Tal (Frontend - Parent Reports UI & Real-Time Updates)
-- [ ] Build the Parent Report Dashboard (`presentation`) (Strictly Hebrew UI).
-- [ ] Create charts/visualizations for success rates, time spent, and subjects covered.
-- [ ] Connect the dashboard to the API Gateway `/api/reports` endpoints (`logic`).
-- [ ] Ensure data updates dynamically based on the selected child profile.
-- [ ] Integrate WebSocket event listeners in the Parent Portal (`logic`) to show real-time Hebrew toast notifications and dynamically update charts when their child earns a badge or completes a game.
+- [x] Build the Parent Report Dashboard (`presentation`) (Strictly Hebrew UI).
+- [x] Create charts/visualizations for success rates, time spent, and subjects covered.
+- [x] Connect the dashboard to the API Gateway `/api/reports` endpoints (`logic`).
+- [x] Ensure data updates dynamically based on the selected child profile.
+- [x] Integrate WebSocket event listeners in the Parent Portal (`logic`) to show real-time Hebrew toast notifications and dynamically update charts when their child earns a badge or completes a game.
 
 ### Dean (Frontend - Gamification UI & P2P Arena)
 - [x] Build the child-facing "Grammar Hero" profile view (Hebrew UI).
