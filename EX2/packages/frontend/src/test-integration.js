@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 const GATEWAY_URL = 'http://localhost:4000';
 
 async function runTests() {
-  console.log('🚀 Starting Sprint 3 E2E Backend & WebSocket Integration Test...');
+  console.log('🚀 מתחיל בדיקת אינטגרציה SPRINT 3: Backend ו-WebSocket...');
   
   const suffix = Math.floor(Math.random() * 100000);
   const parentEmail = `parent_${suffix}@test.com`;
@@ -22,7 +22,7 @@ async function runTests() {
     throw new Error(`Parent registration failed: ${await parentRegRes.text()}`);
   }
   const parentData = await parentRegRes.json();
-  console.log('✅ Parent registered successfully. Token obtained.');
+  console.log('✅ ההורה נרשם בהצלחה. הושג טוקן.');
 
   const parentToken = parentData.accessToken;
 
@@ -40,7 +40,7 @@ async function runTests() {
   }
   const childCreateData = await childCreateRes.json();
   const childId = childCreateData.user._id;
-  console.log(`✅ Child created successfully. Child ID: ${childId}`);
+  console.log(`✅ הילד נוצר בהצלחה. מזהה: ${childId}`);
 
   console.log('\n3. Logging in as Child...');
   const childLoginRes = await fetch(`${GATEWAY_URL}/api/users/children/login`, {
@@ -52,7 +52,7 @@ async function runTests() {
     throw new Error(`Child login failed: ${await childLoginRes.text()}`);
   }
   const childLoginData = await childLoginRes.json();
-  console.log('✅ Child logged in successfully. Access token obtained.');
+  console.log('✅ הילד הוכנס בהצלחה. הושג טוקן גישה.');
 
   console.log('\n4. Fetching initial Gamification stats...');
   const initialStatsRes = await fetch(`${GATEWAY_URL}/api/reports/gamification/${childId}`);
@@ -60,7 +60,7 @@ async function runTests() {
     throw new Error(`Failed to fetch stats: ${await initialStatsRes.text()}`);
   }
   const initialStats = await initialStatsRes.json();
-  console.log('✅ Gamification stats fetched:', initialStats);
+  console.log('✅ סטטיסטיקות הגמיפיקציה נשלפו:', initialStats);
   if (initialStats.points !== 0 || initialStats.rank !== 'Beginner') {
     throw new Error('Initial points or rank do not match expected defaults.');
   }
@@ -70,7 +70,7 @@ async function runTests() {
   
   await new Promise((resolve, reject) => {
     socket.on('connect', () => {
-      console.log(`✅ Connected to WebSocket Gateway. Socket ID: ${socket.id}`);
+      console.log(`✅ מחובר לשער ה-WebSocket. Socket ID: ${socket.id}`);
       resolve();
     });
     socket.on('connect_error', (err) => reject(err));
@@ -78,7 +78,7 @@ async function runTests() {
 
   const milestonePromise = new Promise((resolve) => {
     socket.on('gamification-milestone', (data) => {
-      console.log('🔥 Received gamification-milestone event via WebSocket:', data);
+      console.log('🔥 התקבל אירוע ציון דרך בגמיפיקציה דרך WebSocket:', data);
       if (data.userId === childId) {
         resolve(data);
       }
@@ -95,7 +95,7 @@ async function runTests() {
     throw new Error(`Award failed: ${await awardRes.text()}`);
   }
   const awardData = await awardRes.json();
-  console.log('✅ Award request successful:', awardData);
+  console.log('✅ בקשת הענקת נקודות הצליחה:', awardData);
 
   console.log('Sending gamification-event through socket to trigger gateway broadcast...');
   socket.emit('gamification-event', {
@@ -109,18 +109,18 @@ async function runTests() {
 
   console.log('Waiting for WebSocket milestone notification...');
   const milestoneData = await milestonePromise;
-  console.log('✅ Real-time WebSocket milestone verified!');
+  console.log('✅ אימות אירוע ציון הדרך בזמן אמת דרך WebSocket הושלם!');
 
   console.log('\n7. Fetching updated Gamification stats...');
   const finalStatsRes = await fetch(`${GATEWAY_URL}/api/reports/gamification/${childId}`);
   const finalStats = await finalStatsRes.json();
-  console.log('✅ Updated Gamification stats:', finalStats);
+  console.log('✅ סטטיסטיקות הגמיפיקציה עודכנו:', finalStats);
   if (finalStats.points !== 30) {
     throw new Error(`Expected points to be 30, got ${finalStats.points}`);
   }
 
   socket.disconnect();
-  console.log('\n🎉 ALL SPRINT 3 INTEGRATION TESTS PASSED SUCCESSFULLY! 🎉');
+  console.log('\n🎉 כל בדיקות האינטגרציה של ספרינט 3 עברו בהצלחה! 🎉');
 }
 
 runTests().catch(err => {

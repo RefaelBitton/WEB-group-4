@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:sprint3": "node src/test-integration.js",
+    "test:websocket-fallback": "node src/test-websocket-fallback.js"
   },
   "devDependencies": {
     "@vitejs/plugin-react-swc": "^4.3.1",
