@@ -1,6 +1,8 @@
 import { useUserStore } from "../../user/data/userStore.js";
 
-const GAME_API = import.meta.env.VITE_API_URL ?? "/api/games";
+const GAME_API = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api/games`
+  : "/api/games";
 
 async function parseJsonResponse(response) {
   const data = await response.json();

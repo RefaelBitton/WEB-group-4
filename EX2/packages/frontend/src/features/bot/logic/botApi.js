@@ -1,6 +1,8 @@
 import { useUserStore } from "../../user/data/userStore.js";
 
-const BOT_API = import.meta.env.VITE_API_URL ?? "/api/bot";
+const BOT_API = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api/bot`
+  : "/api/bot";
 
 function getHeaders(extraHeaders = {}) {
   const token = useUserStore.getState().token;
