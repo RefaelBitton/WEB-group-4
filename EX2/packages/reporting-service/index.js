@@ -18,7 +18,7 @@ dotenv.config();
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const app = express();
-const PORT = process.env.REPORTING_SERVICE_PORT || process.env.PORT || 3004;
+const PORT = process.env.REPORTING_SERVICE_PORT || 3004;
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/english_learning_bot";
 
 app.use(cors());

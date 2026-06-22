@@ -6,7 +6,7 @@ dotenv.config();
 
 
 export const env = {
-  port: Number(process.env.PORT || 4001),
+  port: Number(process.env.USER_SERVICE_PORT || 4001),
   mongoUri: process.env.MONGO_URI || "mongodb://localhost:27017/english_learning_bot",
   jwtSecret: process.env.JWT_SECRET || "default_dev_secret",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1d",
