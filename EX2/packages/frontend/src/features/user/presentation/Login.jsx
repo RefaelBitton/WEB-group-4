@@ -86,7 +86,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-3 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-gray-50 text-gray-900"
-                    placeholder="הכנס דוא\"ל (דוגמה: parent@דוגמה.com)"
+                    placeholder='הכנס דוא"ל (דוגמה: parent@דוגמה.com)'
                     required
                   />
                 </div>
