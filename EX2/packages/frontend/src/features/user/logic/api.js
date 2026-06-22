@@ -1,4 +1,5 @@
-const BASE_URL = '/api/users';
+const API_URL = import.meta.env.VITE_API_URL || '';
+const BASE_URL = `${API_URL}/api/users`;
 
 export const registerParent = async ({ name, email, password }) => {
   const res = await fetch(`${BASE_URL}/parents/register`, {
@@ -70,7 +71,7 @@ export const addChild = async (childData, token) => {
 };
 
 export const getChildReport = async (childId, token) => {
-  const res = await fetch(`/api/reports/progress/${childId}`, {
+  const res = await fetch(`${API_URL}/api/reports/progress/${childId}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`
@@ -84,7 +85,7 @@ export const getChildReport = async (childId, token) => {
 };
 
 export const getChildGamification = async (childId, token) => {
-  const res = await fetch(`/api/reports/gamification/${childId}`, {
+  const res = await fetch(`${API_URL}/api/reports/gamification/${childId}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`
