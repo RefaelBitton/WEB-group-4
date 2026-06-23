@@ -21,8 +21,8 @@ router.get("/image/proxy", async (req, res, next) => {
       error.status = 400;
       throw error;
     }
-    const buffer = await fetchImage(imageUrl);
-    res.set("Content-Type", "image/jpeg");
+    const { buffer, contentType } = await fetchImage(imageUrl);
+    res.set("Content-Type", contentType || "application/octet-stream");
     res.set("Cache-Control", "public, max-age=86400");
     res.send(buffer);
   } catch (error) {

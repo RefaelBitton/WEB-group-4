@@ -269,7 +269,11 @@ export async function fetchImage(imageUrl) {
       throw error;
     }
 
-    return await response.arrayBuffer();
+    const arrayBuffer = await response.arrayBuffer();
+    return {
+      buffer: Buffer.from(arrayBuffer),
+      contentType,
+    };
   } catch (err) {
     const error = new Error(`Failed to fetch image from ${imageUrl}: ${err.message}`);
     error.status = err.status || 502;
