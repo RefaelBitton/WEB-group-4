@@ -248,11 +248,14 @@ export async function submitAnswer(gameId, answerId, sessionKey = DEFAULT_SESSIO
 }
 
 export async function fetchImage(imageUrl) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+
   try {
     const response = await fetch(imageUrl, {
-      timeout: 10000,
+      signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
       }
     });
 
@@ -262,9 +265,9 @@ export async function fetchImage(imageUrl) {
       throw error;
     }
 
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('image')) {
-      const error = new Error('Invalid content type: expected image');
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("image")) {
+      const error = new Error("Invalid content type: expected image");
       error.status = 400;
       throw error;
     }
@@ -276,7 +279,9 @@ export async function fetchImage(imageUrl) {
     };
   } catch (err) {
     const error = new Error(`Failed to fetch image from ${imageUrl}: ${err.message}`);
-    error.status = err.status || 502;
+    error.status = err.name === "AbortError" ? 504 : err.status || 502;
     throw error;
+  } finally {
+    clearTimeout(timeout);
   }
 }
