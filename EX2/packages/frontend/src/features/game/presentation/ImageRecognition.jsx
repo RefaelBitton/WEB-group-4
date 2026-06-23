@@ -3,14 +3,26 @@ import React from "react";
 export function ImageRecognition({ questionData, onAnswerSubmit, onBack, loading }) {
   if (!questionData) return <div className="text-center p-12">טוען נתונים...</div>;
 
+  // Convert external image URLs to use our proxy endpoint
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      // Use the backend proxy endpoint for external URLs
+      return `/api/games/image/proxy?url=${encodeURIComponent(imageUrl)}`;
+    }
+    return imageUrl; // Return relative or local URLs as-is
+  };
+
+  const proxiedImageUrl = getImageUrl(questionData.imageUrl);
+
   return (
     <section className="rounded-[2.5rem] border border-slate-200 bg-white p-8 md:p-12 shadow-sm text-center">
       <h2 className="text-3xl font-bold text-slate-900 mb-4">משחק זיהוי תמונות</h2>
       <p className="text-xl text-slate-500 mb-8">לחצו על האפשרות שמתארת את התמונה בצורה הטובה ביותר.</p>
       
       <div className="bg-slate-50 border border-slate-100 rounded-3xl h-80 md:h-[28rem] w-full flex items-center justify-center mb-8 overflow-hidden">
-        {questionData.imageUrl ? (
-          <img src={questionData.imageUrl} alt="Game visual" className="max-w-full max-h-full object-contain" />
+        {proxiedImageUrl ? (
+          <img src={proxiedImageUrl} alt="Game visual" className="max-w-full max-h-full object-contain" />
         ) : (
           <span className="text-slate-400 text-lg">תמונה תוצג כאן</span>
         )}

@@ -246,3 +246,33 @@ export async function submitAnswer(gameId, answerId, sessionKey = DEFAULT_SESSIO
     questionId: question.id,
   };
 }
+
+export async function fetchImage(imageUrl) {
+  try {
+    const response = await fetch(imageUrl, {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+
+    if (!response.ok) {
+      const error = new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      error.status = response.status;
+      throw error;
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('image')) {
+      const error = new Error('Invalid content type: expected image');
+      error.status = 400;
+      throw error;
+    }
+
+    return await response.arrayBuffer();
+  } catch (err) {
+    const error = new Error(`Failed to fetch image from ${imageUrl}: ${err.message}`);
+    error.status = err.status || 502;
+    throw error;
+  }
+}
