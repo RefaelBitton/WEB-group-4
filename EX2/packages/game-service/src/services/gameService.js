@@ -1,5 +1,7 @@
+import http from "http";
+import https from "https";
+import { URL } from "url";
 import mongoose from "mongoose";
-import { fetch, AbortController } from "undici";
 import { isDatabaseConnected } from "../config/db.js";
 import { gameTypes } from "../data/seedData.js";
 import { GameSession } from "../models/GameSession.js";
@@ -249,40 +251,54 @@ export async function submitAnswer(gameId, answerId, sessionKey = DEFAULT_SESSIO
 }
 
 export async function fetchImage(imageUrl) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
+  const url = new URL(imageUrl);
+  const protocol = url.protocol === "https:" ? https : http;
+  const timeoutMs = 10000;
 
-  try {
-    const response = await fetch(imageUrl, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+  return new Promise((resolve, reject) => {
+    const req = protocol.get(
+      url,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+      },
+      (res) => {
+        const statusCode = res.statusCode || 0;
+        const contentType = res.headers["content-type"] || "";
+
+        if (statusCode >= 300 && statusCode < 400 && res.headers.location) {
+          if (url.href === res.headers.location) {
+            reject(new Error(`Redirect loop detected for ${imageUrl}`));
+            req.destroy();
+            return;
+          }
+          resolve(fetchImage(new URL(res.headers.location, url).href));
+          return;
+        }
+
+        if (statusCode < 200 || statusCode >= 300) {
+          reject(new Error(`Failed to fetch image: ${statusCode} ${res.statusMessage || ""}`));
+          res.resume();
+          return;
+        }
+
+        if (!contentType.includes("image")) {
+          reject(new Error(`Invalid content type: expected image but got ${contentType}`));
+          res.resume();
+          return;
+        }
+
+        const chunks = [];
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => resolve({ buffer: Buffer.concat(chunks), contentType }));
       }
+    );
+
+    req.on("error", (err) => reject(err));
+    req.setTimeout(timeoutMs, () => {
+      req.destroy(new Error("Image request timed out"));
     });
-
-    if (!response.ok) {
-      const error = new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
-      error.status = response.status;
-      throw error;
-    }
-
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("image")) {
-      const error = new Error("Invalid content type: expected image");
-      error.status = 400;
-      throw error;
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    return {
-      buffer: Buffer.from(arrayBuffer),
-      contentType,
-    };
-  } catch (err) {
-    const error = new Error(`Failed to fetch image from ${imageUrl}: ${err.message}`);
-    error.status = err.name === "AbortError" ? 504 : err.status || 502;
-    throw error;
-  } finally {
-    clearTimeout(timeout);
-  }
+  });
 }
+

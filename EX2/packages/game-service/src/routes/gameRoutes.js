@@ -26,6 +26,7 @@ router.get("/image/proxy", async (req, res, next) => {
     res.set("Cache-Control", "public, max-age=86400");
     res.send(buffer);
   } catch (error) {
+    console.error("Image proxy failed:", error.message, error.stack);
     next(error);
   }
 });
