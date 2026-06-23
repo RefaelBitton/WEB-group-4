@@ -32,7 +32,8 @@ export function ImageRecognition({ questionData, onAnswerSubmit, onBack, loading
         ) : imageError ? (
           <div className="text-center px-6">
             <p className="text-red-500 font-semibold mb-2">שגיאה בטעינת התמונה.</p>
-            <p className="text-sm text-slate-500">נסה לרענן את הדף או להפעיל את השרת מחדש.</p>
+            <p className="text-sm text-slate-500 mb-3">נסה לרענן את הדף או להפעיל את השרת מחדש.</p>
+            <p className="text-xs text-slate-400 break-all">URL שניסינו לטעון: {proxiedImageUrl}</p>
           </div>
         ) : (
           <span className="text-slate-400 text-lg">תמונה תוצג כאן</span>
