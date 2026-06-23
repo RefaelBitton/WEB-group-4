@@ -1,16 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 
 export function ImageRecognition({ questionData, onAnswerSubmit, onBack, loading }) {
+  const [imageError, setImageError] = useState(false);
+
   if (!questionData) return <div className="text-center p-12">טוען נתונים...</div>;
 
   // Convert external image URLs to use our proxy endpoint
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return null;
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      // Use the backend proxy endpoint for external URLs
+    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
       return `/api/games/image/proxy?url=${encodeURIComponent(imageUrl)}`;
     }
-    return imageUrl; // Return relative or local URLs as-is
+    return imageUrl;
   };
 
   const proxiedImageUrl = getImageUrl(questionData.imageUrl);
@@ -21,8 +22,18 @@ export function ImageRecognition({ questionData, onAnswerSubmit, onBack, loading
       <p className="text-xl text-slate-500 mb-8">לחצו על האפשרות שמתארת את התמונה בצורה הטובה ביותר.</p>
       
       <div className="bg-slate-50 border border-slate-100 rounded-3xl h-80 md:h-[28rem] w-full flex items-center justify-center mb-8 overflow-hidden">
-        {proxiedImageUrl ? (
-          <img src={proxiedImageUrl} alt="Game visual" className="max-w-full max-h-full object-contain" />
+        {proxiedImageUrl && !imageError ? (
+          <img
+            src={proxiedImageUrl}
+            alt="Game visual"
+            className="max-w-full max-h-full object-contain"
+            onError={() => setImageError(true)}
+          />
+        ) : imageError ? (
+          <div className="text-center px-6">
+            <p className="text-red-500 font-semibold mb-2">שגיאה בטעינת התמונה.</p>
+            <p className="text-sm text-slate-500">נסה לרענן את הדף או להפעיל את השרת מחדש.</p>
+          </div>
         ) : (
           <span className="text-slate-400 text-lg">תמונה תוצג כאן</span>
         )}
