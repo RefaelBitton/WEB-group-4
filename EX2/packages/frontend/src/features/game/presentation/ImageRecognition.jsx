@@ -8,8 +8,9 @@ export function ImageRecognition({ questionData, onAnswerSubmit, onBack, loading
   // Convert external image URLs to use our proxy endpoint
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return null;
+    const apiUrl = import.meta.env.VITE_API_URL || "";
     if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-      return `/api/games/image/proxy?url=${encodeURIComponent(imageUrl)}`;
+      return `${apiUrl}/api/games/image/proxy?url=${encodeURIComponent(imageUrl)}`;
     }
     return imageUrl;
   };
