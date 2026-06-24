@@ -59,7 +59,7 @@ const createServiceProxy = (targetUrl) => {
   return createProxyMiddleware({
     target: targetUrl,
     changeOrigin: true,
-    pathRewrite: (_path, req) => req.originalUrl.split("?")[0],
+    pathRewrite: (_path, req) => req.originalUrl,
     logger: console,
     onError: (err, req, res) => {
       console.error(`[Gateway Proxy Error] target: ${targetUrl}, path: ${req.url}`, err);
