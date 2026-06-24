@@ -4,6 +4,7 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import http from "http";
+import https from "https";
 import { Server } from "socket.io";
 
 import path from "path";
@@ -80,6 +81,68 @@ app.use("/api/users", createServiceProxy(USER_SERVICE_URL));
 app.use("/api/bot", createServiceProxy(BOT_SERVICE_URL));
 
 // 3. Game Service
+// Image proxy – handled directly by the gateway so it works even if the
+// game-service hasn't deployed this route yet.
+app.get("/api/games/image/proxy", (req, res) => {
+  const imageUrl = req.query.url;
+  if (!imageUrl) {
+    return res.status(400).json({ error: "url query parameter is required" });
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(imageUrl);
+  } catch {
+    return res.status(400).json({ error: "Invalid URL" });
+  }
+
+  const protocol = parsed.protocol === "https:" ? https : http;
+  const fetchOptions = {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    },
+  };
+
+  const proxyReq = protocol.get(parsed, fetchOptions, (upstream) => {
+    // Follow one redirect
+    if (
+      upstream.statusCode >= 300 &&
+      upstream.statusCode < 400 &&
+      upstream.headers.location
+    ) {
+      const redirectUrl = new URL(upstream.headers.location, parsed);
+      const rProto = redirectUrl.protocol === "https:" ? https : http;
+      rProto.get(redirectUrl, fetchOptions, (rUpstream) => {
+        res.set("Content-Type", rUpstream.headers["content-type"] || "application/octet-stream");
+        res.set("Cache-Control", "public, max-age=86400");
+        rUpstream.pipe(res);
+      }).on("error", () => res.status(502).json({ error: "Redirect fetch failed" }));
+      return;
+    }
+
+    if (upstream.statusCode < 200 || upstream.statusCode >= 300) {
+      return res
+        .status(upstream.statusCode || 502)
+        .json({ error: `Upstream returned ${upstream.statusCode}` });
+    }
+
+    res.set("Content-Type", upstream.headers["content-type"] || "application/octet-stream");
+    res.set("Cache-Control", "public, max-age=86400");
+    upstream.pipe(res);
+  });
+
+  proxyReq.on("error", (err) => {
+    console.error("[Gateway] Image proxy error:", err.message);
+    res.status(502).json({ error: "Failed to fetch image" });
+  });
+
+  proxyReq.setTimeout(15000, () => {
+    proxyReq.destroy();
+    res.status(504).json({ error: "Image request timed out" });
+  });
+});
+
 app.use("/api/games", createServiceProxy(GAME_SERVICE_URL));
 
 // 4. Reporting Service
