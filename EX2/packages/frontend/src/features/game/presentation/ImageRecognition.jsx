@@ -22,7 +22,7 @@ export function ImageRecognition({ questionData, onAnswerSubmit, onBack, loading
       <h2 className="text-3xl font-bold text-slate-900 mb-4">משחק זיהוי תמונות</h2>
       <p className="text-xl text-slate-500 mb-8">לחצו על האפשרות שמתארת את התמונה בצורה הטובה ביותר.</p>
       
-      <div className="bg-slate-50 border border-slate-100 rounded-3xl h-80 md:h-[28rem] w-full flex items-center justify-center mb-8 overflow-hidden">
+      <div className="bg-slate-50 border border-slate-100 rounded-3xl h-80 md:h-112 w-full flex items-center justify-center mb-8 overflow-hidden">
         {proxiedImageUrl && !imageError ? (
           <img
             src={proxiedImageUrl}

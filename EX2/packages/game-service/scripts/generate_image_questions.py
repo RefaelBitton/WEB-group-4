@@ -17,7 +17,7 @@ for level, words in LEVELS.items():
         CATEGORY_TO_LEVEL[word] = level
 
 def download_and_extract():
-    url = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
+    url = "https://images.cocodataset.org/annotations/annotations_trainval2017.zip"
     zip_path = "annotations_trainval2017.zip"
     extracted_dir = "temp_coco"
     target_file = "annotations/instances_val2017.json"
