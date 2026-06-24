@@ -5,11 +5,14 @@ export function ImageRecognition({ questionData, onAnswerSubmit, onBack, loading
 
   if (!questionData) return <div className="text-center p-12">טוען נתונים...</div>;
 
-  // Convert external image URLs to use our proxy endpoint
+  // Convert external image URLs to use our proxy endpoint (only needed for http://)
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return null;
-    const apiUrl = import.meta.env.VITE_API_URL || "";
-    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    // HTTPS images can be loaded directly by the browser — no proxy needed
+    if (imageUrl.startsWith("https://")) return imageUrl;
+    // HTTP images must be proxied to avoid mixed-content blocking on HTTPS sites
+    if (imageUrl.startsWith("http://")) {
+      const apiUrl = import.meta.env.VITE_API_URL || "";
       return `${apiUrl}/api/games/image/proxy?url=${encodeURIComponent(imageUrl)}`;
     }
     return imageUrl;
