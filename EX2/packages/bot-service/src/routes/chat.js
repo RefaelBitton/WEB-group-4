@@ -118,10 +118,10 @@ ${agePrompt}`;
       evaluation = fallbacks[Math.floor(Math.random() * fallbacks.length)];
     }
 
-    // Format content by appending Hebrew correction if mistakes exist
+    // Format content by appending Hebrew correction if mistakes exist (separated by two newlines for clean separation)
     let content = evaluation.response;
     if (evaluation.hasErrors && evaluation.correction) {
-      content += `\n(Hebrew Correction: ${evaluation.correction})`;
+      content += `\n\n(Hebrew Correction: ${evaluation.correction})`;
     }
 
     // Log chat activity to reporting service asynchronously

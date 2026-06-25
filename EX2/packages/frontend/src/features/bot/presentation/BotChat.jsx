@@ -92,11 +92,22 @@ export function BotChat() {
                   <p className={`text-xs mb-2 font-semibold tracking-wider uppercase opacity-80 ${isUser ? "text-indigo-200" : "text-slate-400"}`}>
                     {isUser ? "את/ה" : "הבוט"}
                   </p>
-                  <div className="text-lg leading-relaxed font-medium" dir="ltr">
+                  <div className="text-lg leading-relaxed font-medium flex flex-col gap-2" dir="ltr">
                     {isUser ? (
                       message.text
                     ) : (
-                      renderHighlightedText(message.text)
+                      message.text.split('\n').filter(line => line.trim() !== '').map((line, idx) => {
+                        const isCorrection = line.includes("(Hebrew Correction:") || /[\u0590-\u05FF]/.test(line);
+                        return (
+                          <div 
+                            key={idx} 
+                            dir={isCorrection ? "rtl" : "ltr"} 
+                            className={isCorrection ? "text-rose-600 bg-rose-50/50 border border-rose-100/50 rounded-2xl p-3 mt-2 text-sm font-semibold shadow-sm w-full block" : ""}
+                          >
+                            {renderHighlightedText(line)}
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 </div>
