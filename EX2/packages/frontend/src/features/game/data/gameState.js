@@ -14,6 +14,13 @@ export function useGame() {
   const [questionsPlayedCount, setQuestionsPlayedCount] = useState(0);
   const [gameFinished, setGameFinished] = useState(false);
 
+  // Scoring and visual feedback states
+  const [sessionScore, setSessionScore] = useState(0);
+  const [selectedOptionId, setSelectedOptionId] = useState(null);
+  const [correctOptionId, setCorrectOptionId] = useState(null);
+  const [isAnswering, setIsAnswering] = useState(false);
+  const [showPointsToast, setShowPointsToast] = useState(false);
+
   useEffect(() => {
     async function loadGames() {
       setLoading(true);
@@ -48,53 +55,84 @@ export function useGame() {
       setCurrentQuestion(null);
       setGameFinished(false);
       setQuestionsPlayedCount(0);
+      setSessionScore(0);
+      setSelectedOptionId(null);
+      setCorrectOptionId(null);
+      setIsAnswering(false);
+      setShowPointsToast(false);
       return;
     }
     const game = games.find((item) => item.id === gameId);
     setSelectedGame(game || { id: gameId, name: "משחק" });
     setGameFinished(false);
     setQuestionsPlayedCount(0);
+    setSessionScore(0);
+    setSelectedOptionId(null);
+    setCorrectOptionId(null);
+    setIsAnswering(false);
+    setShowPointsToast(false);
     await loadNextQuestion(gameId);
   }
 
   async function answerGame(gameId, payload) {
-    setLoading(true);
+    setIsAnswering(true);
     setError(null);
+    setSelectedOptionId(payload.answerId);
     try {
       const result = await submitGameAnswer(gameId, payload);
       
-      const newCount = questionsPlayedCount + 1;
-      setQuestionsPlayedCount(newCount);
+      const isCorrect = result.correct;
+      const points = result.pointsEarned ?? 10;
+      setCorrectOptionId(result.correctAnswerId);
 
-      if (newCount >= 5) {
-        // Complete the game session!
-        setGameFinished(true);
-        setCurrentQuestion(null);
-
-        // Award gamification points for game completion
-        const currentChildId = useUserStore.getState().user?._id;
-        if (currentChildId) {
-          await useGamificationStore.getState().triggerAward(currentChildId, "game_completed");
-
-          // Keep track of completed games in the session to award VOCABULARY_EXPLORER
-          const completedCount = parseInt(localStorage.getItem("completed_games_count") || "0") + 1;
-          localStorage.setItem("completed_games_count", completedCount.toString());
-          if (completedCount === 3) {
-            await useGamificationStore.getState().triggerAward(currentChildId, "three_games_completed");
-          }
-        }
-      } else {
-        // Automatically load the next question after answering
-        await loadNextQuestion(gameId);
+      if (isCorrect) {
+        setSessionScore((prev) => prev + points);
+        setShowPointsToast(true);
       }
+
+      const newCount = questionsPlayedCount + 1;
+
+      // Hold screen to display feedback before advancing
+      setTimeout(async () => {
+        setShowPointsToast(false);
+        setSelectedOptionId(null);
+        setCorrectOptionId(null);
+        setIsAnswering(false);
+        setQuestionsPlayedCount(newCount);
+
+        if (newCount >= 5) {
+          // Complete the game session!
+          setGameFinished(true);
+          setCurrentQuestion(null);
+
+          // Award gamification points for game completion
+          const currentChildId = useUserStore.getState().user?._id;
+          if (currentChildId) {
+            await useGamificationStore.getState().triggerAward(currentChildId, "game_completed");
+
+            // Keep track of completed games in the session to award VOCABULARY_EXPLORER
+            const completedCount = parseInt(localStorage.getItem("completed_games_count") || "0") + 1;
+            localStorage.setItem("completed_games_count", completedCount.toString());
+            if (completedCount === 3) {
+              await useGamificationStore.getState().triggerAward(currentChildId, "three_games_completed");
+            }
+          }
+        } else {
+          // Automatically load the next question after answering
+          await loadNextQuestion(gameId);
+        }
+      }, 1500);
+
       return result;
     } catch (err) {
       setError("שגיאה בשליחת תשובה. נסה שוב.");
-      // Automatically load the next question to prevent getting stuck on a stale question
-      await loadNextQuestion(gameId);
+      setTimeout(async () => {
+        setSelectedOptionId(null);
+        setCorrectOptionId(null);
+        setIsAnswering(false);
+        await loadNextQuestion(gameId);
+      }, 1500);
       return null;
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -109,5 +147,10 @@ export function useGame() {
     questionsPlayedCount,
     gameFinished,
     setGameFinished,
+    sessionScore,
+    selectedOptionId,
+    correctOptionId,
+    isAnswering,
+    showPointsToast,
   };
 }
