@@ -28,17 +28,17 @@ export function SentenceCompletion({
           const isCorrect = opt.id === correctOptionId;
           const hasAnswered = selectedOptionId !== null;
 
-          let btnStyles = "rounded-2xl border-2 border-slate-200 bg-slate-50 px-6 py-5 text-center text-2xl font-bold transition-all cursor-pointer";
+          let btnStyles = "rounded-2xl border-2 px-6 py-5 text-center text-2xl font-bold transition-all cursor-pointer";
           
           if (!hasAnswered) {
-            btnStyles += " hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 active:scale-95";
+            btnStyles += " border-slate-200 bg-slate-50 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 active:scale-95";
           } else {
             if (isCorrect) {
               btnStyles += " bg-emerald-500 border-emerald-600 text-white shadow-md scale-105";
             } else if (isSelected) {
               btnStyles += " bg-rose-500 border-rose-600 text-white shadow-md shake-anim";
             } else {
-              btnStyles += " opacity-40 grayscale-[20%] cursor-not-allowed";
+              btnStyles += " border-slate-200 bg-slate-50 opacity-40 grayscale-[20%] cursor-not-allowed";
             }
           }
 
