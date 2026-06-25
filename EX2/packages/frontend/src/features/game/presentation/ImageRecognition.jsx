@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 
-export function ImageRecognition({ questionData, onAnswerSubmit, onBack, loading }) {
+export function ImageRecognition({ 
+  questionData, 
+  onAnswerSubmit, 
+  onBack, 
+  loading,
+  selectedOptionId,
+  correctOptionId,
+  isAnswering
+}) {
   const [imageError, setImageError] = useState(false);
 
   if (!questionData) return <div className="text-center p-12">טוען נתונים...</div>;
@@ -50,16 +58,38 @@ export function ImageRecognition({ questionData, onAnswerSubmit, onBack, loading
       </div>
       
       <div className="grid gap-4 sm:grid-cols-2 mb-10">
-        {questionData.options.map((opt) => (
-          <button 
-            key={opt.id}
-            onClick={() => onAnswerSubmit(opt.id)}
-            disabled={loading}
-            className="rounded-2xl border-2 border-slate-200 bg-slate-50 px-6 py-5 text-center text-xl font-bold hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {opt.text}
-          </button>
-        ))}
+        {questionData.options.map((opt) => {
+          const isSelected = opt.id === selectedOptionId;
+          const isCorrect = opt.id === correctOptionId;
+          const hasAnswered = selectedOptionId !== null;
+
+          let btnStyles = "rounded-2xl border-2 border-slate-200 bg-slate-50 px-6 py-5 text-center text-xl font-bold transition-all cursor-pointer";
+          
+          if (!hasAnswered) {
+            btnStyles += " hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 active:scale-95";
+          } else {
+            if (isCorrect) {
+              btnStyles += " bg-emerald-500 border-emerald-600 text-white shadow-md scale-105";
+            } else if (isSelected) {
+              btnStyles += " bg-rose-500 border-rose-600 text-white shadow-md shake-anim";
+            } else {
+              btnStyles += " opacity-40 grayscale-[20%] cursor-not-allowed";
+            }
+          }
+
+          return (
+            <button 
+              key={opt.id}
+              onClick={() => onAnswerSubmit(opt.id)}
+              disabled={isAnswering || loading}
+              className={`${btnStyles} disabled:cursor-not-allowed relative overflow-hidden flex items-center justify-center gap-2`}
+            >
+              <span>{opt.text}</span>
+              {hasAnswered && isCorrect && <span className="text-xl">✓</span>}
+              {hasAnswered && isSelected && !isCorrect && <span className="text-xl">✗</span>}
+            </button>
+          );
+        })}
       </div>
 
       <button
