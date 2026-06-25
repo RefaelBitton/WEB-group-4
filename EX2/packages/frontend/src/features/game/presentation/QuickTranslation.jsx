@@ -12,12 +12,12 @@ export function QuickTranslation({
   if (!questionData) return <div className="text-center p-12">טוען נתונים...</div>;
 
   return (
-    <section className="rounded-[2.5rem] border border-slate-200 bg-white p-8 md:p-12 shadow-sm text-center">
-      <h2 className="text-3xl font-bold text-slate-900 mb-4">תרגום מהיר</h2>
-      <p className="text-xl text-slate-500 mb-8">תרגמו את המילה שמוצגת לאנגלית.</p>
+    <section className="rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 md:p-12 shadow-sm text-center transition-colors duration-300">
+      <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">תרגום מהיר</h2>
+      <p className="text-xl text-slate-505 dark:text-slate-400 mb-8">תרגמו את המילה שמוצגת לאנגלית.</p>
       
-      <div className="bg-purple-50 rounded-3xl p-10 text-center mb-8 border border-purple-100">
-        <p className="text-4xl text-purple-900 font-extrabold">
+      <div className="bg-purple-50 dark:bg-purple-950/20 rounded-3xl p-10 text-center mb-8 border border-purple-100 dark:border-purple-900/30 transition-colors">
+        <p className="text-4xl text-purple-900 dark:text-purple-200 font-extrabold">
           {questionData.text}
         </p>
       </div>
@@ -32,13 +32,13 @@ export function QuickTranslation({
           let btnStyles = "rounded-2xl border-2 px-6 py-5 text-center text-2xl font-bold transition-all cursor-pointer";
           
           if (!hasAnswered) {
-            btnStyles += " border-slate-200 bg-slate-50 hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700 active:scale-95";
+            btnStyles += " border-slate-205 dark:border-slate-750 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:text-purple-700 dark:hover:text-purple-400 active:scale-95";
           } else {
             if (!hasResult) {
               if (isSelected) {
-                btnStyles += " border-purple-400 bg-purple-50 text-purple-700 animate-pulse";
+                btnStyles += " border-purple-400 bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-305 animate-pulse";
               } else {
-                btnStyles += " border-slate-200 bg-slate-50 opacity-40 cursor-not-allowed";
+                btnStyles += " border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 opacity-40 cursor-not-allowed";
               }
             } else {
               if (isCorrect) {
@@ -46,7 +46,7 @@ export function QuickTranslation({
               } else if (isSelected) {
                 btnStyles += " bg-rose-500 border-rose-600 text-white shadow-md shake-anim";
               } else {
-                btnStyles += " border-slate-200 bg-slate-50 opacity-40 grayscale-[20%] cursor-not-allowed";
+                btnStyles += " border-slate-205 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 opacity-40 grayscale-[20%] cursor-not-allowed text-slate-600 dark:text-slate-400";
               }
             }
           }
@@ -68,7 +68,7 @@ export function QuickTranslation({
 
       <button
         onClick={onBack}
-        className="px-6 py-3 bg-slate-100 rounded-xl text-slate-600 hover:bg-slate-200 hover:text-slate-900 font-medium transition-colors"
+        className="px-6 py-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-605 dark:text-slate-350 hover:bg-slate-205 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white font-medium transition-colors cursor-pointer"
       >
         חזור למרכז המשחקים
       </button>
