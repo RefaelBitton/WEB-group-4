@@ -20,6 +20,8 @@ export function useGame() {
   const [correctOptionId, setCorrectOptionId] = useState(null);
   const [isAnswering, setIsAnswering] = useState(false);
   const [showPointsToast, setShowPointsToast] = useState(false);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
+  const [wrongAnswersCount, setWrongAnswersCount] = useState(0);
 
   useEffect(() => {
     async function loadGames() {
@@ -60,6 +62,8 @@ export function useGame() {
       setCorrectOptionId(null);
       setIsAnswering(false);
       setShowPointsToast(false);
+      setCorrectAnswersCount(0);
+      setWrongAnswersCount(0);
       return;
     }
     const game = games.find((item) => item.id === gameId);
@@ -71,6 +75,8 @@ export function useGame() {
     setCorrectOptionId(null);
     setIsAnswering(false);
     setShowPointsToast(false);
+    setCorrectAnswersCount(0);
+    setWrongAnswersCount(0);
     await loadNextQuestion(gameId);
   }
 
@@ -87,7 +93,10 @@ export function useGame() {
 
       if (isCorrect) {
         setSessionScore((prev) => prev + points);
+        setCorrectAnswersCount((prev) => prev + 1);
         setShowPointsToast(true);
+      } else {
+        setWrongAnswersCount((prev) => prev + 1);
       }
 
       const newCount = questionsPlayedCount + 1;
@@ -100,7 +109,7 @@ export function useGame() {
         setIsAnswering(false);
         setQuestionsPlayedCount(newCount);
 
-        if (newCount >= 5) {
+        if (newCount >= 10) {
           // Complete the game session!
           setGameFinished(true);
           setCurrentQuestion(null);
@@ -152,5 +161,7 @@ export function useGame() {
     correctOptionId,
     isAnswering,
     showPointsToast,
+    correctAnswersCount,
+    wrongAnswersCount,
   };
 }
