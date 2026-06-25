@@ -23,6 +23,8 @@ export function GameHub() {
     correctOptionId,
     isAnswering,
     showPointsToast,
+    correctAnswersCount,
+    wrongAnswersCount,
   } = useGame();
   
   const navigate = useNavigate();
@@ -52,9 +54,26 @@ export function GameHub() {
             <h2 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
               כל הכבוד! סיימת את המשחק! 🎉
             </h2>
-            <p className="text-xl text-slate-500 mb-8 max-w-md leading-relaxed">
-              ענית בהצלחה על <strong>{questionsPlayedCount}</strong> שאלות ב<strong>{selectedGame.name}</strong> וצברת <strong>{sessionScore}</strong> נקודות! 🏆
-              הרווחת <strong>30 נקודות בונוס</strong> לדרגת גיבור הדקדוק שלך! 🏆
+            <p className="text-xl text-slate-500 mb-6 max-w-md leading-relaxed">
+              סיימת <strong>10</strong> שאלות ב<strong>{selectedGame.name}</strong> וצברת <strong>{sessionScore}</strong> נקודות! 🏆
+            </p>
+            <div className="flex gap-8 mb-8 justify-center bg-slate-50 border border-slate-200/60 p-6 rounded-3xl w-full max-w-sm">
+              <div className="flex flex-col items-center">
+                <span className="text-emerald-600 font-bold text-lg flex items-center gap-1">
+                  תשובות נכונות ✓
+                </span>
+                <span className="text-3xl font-black text-emerald-600 mt-1">{correctAnswersCount}</span>
+              </div>
+              <div className="w-[1.5px] bg-slate-200 self-stretch"></div>
+              <div className="flex flex-col items-center">
+                <span className="text-rose-500 font-bold text-lg flex items-center gap-1">
+                  תשובות שגויות ✗
+                </span>
+                <span className="text-3xl font-black text-rose-500 mt-1">{wrongAnswersCount}</span>
+              </div>
+            </div>
+            <p className="text-lg text-indigo-600 font-bold mb-8">
+              הרווחת 30 נקודות בונוס לדרגת גיבור הדקדוק שלך! 🏆
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
@@ -76,7 +95,7 @@ export function GameHub() {
         </section>
       );
     } else {
-      const progressPercent = Math.min(100, (questionsPlayedCount / 5) * 100);
+      const progressPercent = Math.min(100, (questionsPlayedCount / 10) * 100);
 
       const gameHeader = (
         <div className="w-full bg-white border border-slate-200 rounded-3xl p-5 mb-8 shadow-sm flex items-center justify-between gap-4">
@@ -84,7 +103,7 @@ export function GameHub() {
           <div className="flex flex-col gap-2 flex-grow">
             <div className="flex justify-between text-lg font-bold text-slate-700">
               <span>{selectedGame.name}</span>
-              <span>שאלה {Math.min(5, questionsPlayedCount + 1)} מתוך 5</span>
+              <span>שאלה {Math.min(10, questionsPlayedCount + 1)} מתוך 10</span>
             </div>
             {/* Progress Bar Container */}
             <div className="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden border border-slate-200/50">
