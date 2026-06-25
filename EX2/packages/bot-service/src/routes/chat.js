@@ -11,21 +11,27 @@ const LEVEL_MAPPING = {
   intermediate: 'B1 (Intermediate)'
 };
 
-async function getChildLevel(req) {
+async function getChildDetails(req) {
   let childLevel = 'beginner';
+  let childAge = 8; // default fallback age to middle of 6-12 range
   const sessionKey = req.auth?.sub;
   
   if (sessionKey && mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(sessionKey)) {
     try {
       const user = await mongoose.connection.db.collection('users').findOne({ _id: new mongoose.Types.ObjectId(sessionKey) });
-      if (user && user.englishLevel) {
-        childLevel = user.englishLevel;
+      if (user) {
+        if (user.englishLevel) {
+          childLevel = user.englishLevel;
+        }
+        if (user.age !== undefined && user.age !== null) {
+          childAge = user.age;
+        }
       }
     } catch (err) {
-      console.error('Error fetching child level from users collection in bot-service:', err);
+      console.error('Error fetching child details from users collection in bot-service:', err);
     }
   }
-  return childLevel;
+  return { childLevel, childAge };
 }
 
 // Helper to format history for the Gemini API
@@ -58,15 +64,24 @@ router.post('/chat', authenticateToken, async (req, res) => {
     // Format previous history
     const formattedHistory = formatHistory(history);
     
-    const levelKey = await getChildLevel(req);
-    const cefrLevel = LEVEL_MAPPING[levelKey] || 'A1 (Beginner)';
+    const { childLevel, childAge } = await getChildDetails(req);
+    const cefrLevel = LEVEL_MAPPING[childLevel] || 'A1 (Beginner)';
+
+    let agePrompt = '';
+    if (childAge <= 8) {
+      agePrompt = `The child is ${childAge} years old. Adopt a highly playful, simple, and encouraging tone. Focus topics strictly on early-elementary interests: animals, toys, colors, pets, family, simple games, and school.`;
+    } else {
+      agePrompt = `The child is ${childAge} years old. Adopt a conversational, friendly, and slightly more mature tone. Focus topics on late-elementary interests: hobbies, video games, sports, favorite books/movies, friends, and school subjects.`;
+    }
 
     const dynamicInstruction = `${SYSTEM_PROMPT}
     
 CRITICAL CONSTRAINT: You must adjust your vocabulary, syntax, complexity, and topics to precisely target the English level: **${cefrLevel}**.
 - If A1: Use only simple present tense, very common words (e.g. dog, cat, apple, like, run), and very short questions.
 - If A2: Use simple present and simple past tense, simple conjunctions, and slightly broader vocabulary.
-- If B1: Use a mix of tenses (including perfect tenses), more varied adjectives/adverbs, and discuss slightly more advanced everyday topics.`;
+- If B1: Use a mix of tenses (including perfect tenses), more varied adjectives/adverbs, and discuss slightly more advanced everyday topics.
+
+${agePrompt}`;
 
     const chatSession = ai.chats.create({
       model: 'gemini-3.1-flash-lite',
@@ -168,15 +183,24 @@ router.post('/evaluate', authenticateToken, async (req, res) => {
     // Format previous history
     const formattedHistory = formatHistory(history);
     
-    const levelKey = await getChildLevel(req);
-    const cefrLevel = LEVEL_MAPPING[levelKey] || 'A1 (Beginner)';
+    const { childLevel, childAge } = await getChildDetails(req);
+    const cefrLevel = LEVEL_MAPPING[childLevel] || 'A1 (Beginner)';
+
+    let agePrompt = '';
+    if (childAge <= 8) {
+      agePrompt = `The child is ${childAge} years old. Adopt a highly playful, simple, and encouraging tone. Focus topics strictly on early-elementary interests: animals, toys, colors, pets, family, simple games, and school.`;
+    } else {
+      agePrompt = `The child is ${childAge} years old. Adopt a conversational, friendly, and slightly more mature tone. Focus topics on late-elementary interests: hobbies, video games, sports, favorite books/movies, friends, and school subjects.`;
+    }
 
     const dynamicInstruction = `${SYSTEM_PROMPT}
     
 CRITICAL CONSTRAINT: You must adjust your vocabulary, syntax, complexity, and topics to precisely target the English level: **${cefrLevel}**.
 - If A1: Use only simple present tense, very common words (e.g. dog, cat, apple, like, run), and very short questions.
 - If A2: Use simple present and simple past tense, simple conjunctions, and slightly broader vocabulary.
-- If B1: Use a mix of tenses (including perfect tenses), more varied adjectives/adverbs, and discuss slightly more advanced everyday topics.`;
+- If B1: Use a mix of tenses (including perfect tenses), more varied adjectives/adverbs, and discuss slightly more advanced everyday topics.
+
+${agePrompt}`;
 
     const chatSession = ai.chats.create({
       model: 'gemini-3.1-flash-lite',
@@ -288,8 +312,8 @@ router.get('/starter', authenticateToken, async (req, res) => {
   try {
     const ai = getAIClient();
     
-    const levelKey = await getChildLevel(req);
-    const cefrLevel = LEVEL_MAPPING[levelKey] || 'A1 (Beginner)';
+    const { childLevel, childAge } = await getChildDetails(req);
+    const cefrLevel = LEVEL_MAPPING[childLevel] || 'A1 (Beginner)';
 
     if (!ai) {
       // Fallback if AI isn't configured yet
@@ -302,11 +326,19 @@ router.get('/starter', authenticateToken, async (req, res) => {
       return res.json({ starter: randomFallback });
     }
 
-    // Use AI to generate a dynamic starter matching the level
+    let ageStarterConstraint = '';
+    if (childAge <= 8) {
+      ageStarterConstraint = `The child is ${childAge} years old. The topic should be suitable for a young child (e.g., animals, toys, colors, pets).`;
+    } else {
+      ageStarterConstraint = `The child is ${childAge} years old. The topic should be suitable for an older child (e.g., hobbies, games, sports, school, movies).`;
+    }
+
+    // Use AI to generate a dynamic starter matching the level and age group
     const prompt = `
-      Generate a very simple, fun conversation starter in English for a child (age 6-12).
+      Generate a very simple, fun conversation starter in English for a child.
       It should be just one or two short sentences asking a question.
       The starter must target the CEFR level: **${cefrLevel}**.
+      ${ageStarterConstraint}
       Do not include any Hebrew. Do not include quotes.
     `;
 
