@@ -62,18 +62,27 @@ export function ImageRecognition({
           const isSelected = opt.id === selectedOptionId;
           const isCorrect = opt.id === correctOptionId;
           const hasAnswered = selectedOptionId !== null;
+          const hasResult = correctOptionId !== null;
 
           let btnStyles = "rounded-2xl border-2 px-6 py-5 text-center text-xl font-bold transition-all cursor-pointer";
           
           if (!hasAnswered) {
             btnStyles += " border-slate-200 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 active:scale-95";
           } else {
-            if (isCorrect) {
-              btnStyles += " bg-emerald-500 border-emerald-600 text-white shadow-md scale-105";
-            } else if (isSelected) {
-              btnStyles += " bg-rose-500 border-rose-600 text-white shadow-md shake-anim";
+            if (!hasResult) {
+              if (isSelected) {
+                btnStyles += " border-indigo-400 bg-indigo-50 text-indigo-700 animate-pulse";
+              } else {
+                btnStyles += " border-slate-200 bg-slate-50 opacity-40 cursor-not-allowed";
+              }
             } else {
-              btnStyles += " border-slate-200 bg-slate-50 opacity-40 grayscale-[20%] cursor-not-allowed";
+              if (isCorrect) {
+                btnStyles += " bg-emerald-500 border-emerald-600 text-white shadow-md scale-105";
+              } else if (isSelected) {
+                btnStyles += " bg-rose-500 border-rose-600 text-white shadow-md shake-anim";
+              } else {
+                btnStyles += " border-slate-200 bg-slate-50 opacity-40 grayscale-[20%] cursor-not-allowed";
+              }
             }
           }
 
@@ -85,8 +94,8 @@ export function ImageRecognition({
               className={`${btnStyles} disabled:cursor-not-allowed relative overflow-hidden flex items-center justify-center gap-2`}
             >
               <span>{opt.text}</span>
-              {hasAnswered && isCorrect && <span className="text-xl">✓</span>}
-              {hasAnswered && isSelected && !isCorrect && <span className="text-xl">✗</span>}
+              {hasAnswered && hasResult && isCorrect && <span className="text-xl">✓</span>}
+              {hasAnswered && hasResult && isSelected && !isCorrect && <span className="text-xl">✗</span>}
             </button>
           );
         })}

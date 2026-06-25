@@ -27,18 +27,27 @@ export function QuickTranslation({
           const isSelected = opt.id === selectedOptionId;
           const isCorrect = opt.id === correctOptionId;
           const hasAnswered = selectedOptionId !== null;
+          const hasResult = correctOptionId !== null;
 
           let btnStyles = "rounded-2xl border-2 px-6 py-5 text-center text-2xl font-bold transition-all cursor-pointer";
           
           if (!hasAnswered) {
             btnStyles += " border-slate-200 bg-slate-50 hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700 active:scale-95";
           } else {
-            if (isCorrect) {
-              btnStyles += " bg-emerald-500 border-emerald-600 text-white shadow-md scale-105";
-            } else if (isSelected) {
-              btnStyles += " bg-rose-500 border-rose-600 text-white shadow-md shake-anim";
+            if (!hasResult) {
+              if (isSelected) {
+                btnStyles += " border-purple-400 bg-purple-50 text-purple-700 animate-pulse";
+              } else {
+                btnStyles += " border-slate-200 bg-slate-50 opacity-40 cursor-not-allowed";
+              }
             } else {
-              btnStyles += " border-slate-200 bg-slate-50 opacity-40 grayscale-[20%] cursor-not-allowed";
+              if (isCorrect) {
+                btnStyles += " bg-emerald-500 border-emerald-600 text-white shadow-md scale-105";
+              } else if (isSelected) {
+                btnStyles += " bg-rose-500 border-rose-600 text-white shadow-md shake-anim";
+              } else {
+                btnStyles += " border-slate-200 bg-slate-50 opacity-40 grayscale-[20%] cursor-not-allowed";
+              }
             }
           }
 
@@ -50,8 +59,8 @@ export function QuickTranslation({
               className={`${btnStyles} disabled:cursor-not-allowed relative overflow-hidden flex items-center justify-center gap-2`}
             >
               <span>{opt.text}</span>
-              {hasAnswered && isCorrect && <span className="text-xl">✓</span>}
-              {hasAnswered && isSelected && !isCorrect && <span className="text-xl">✗</span>}
+              {hasAnswered && hasResult && isCorrect && <span className="text-xl">✓</span>}
+              {hasAnswered && hasResult && isSelected && !isCorrect && <span className="text-xl">✗</span>}
             </button>
           );
         })}
