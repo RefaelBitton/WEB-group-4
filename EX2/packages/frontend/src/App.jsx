@@ -13,6 +13,7 @@ import { useUserStore } from './features/user/data/userStore';
 import { useGamificationStore } from './features/gamification/data/gamificationStore';
 import MilestoneToast from './features/gamification/presentation/MilestoneToast';
 import ThemeToggle from './components/ThemeToggle';
+import BottomNavBar from './components/BottomNavBar';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -59,6 +60,7 @@ export default function App() {
       <BrowserRouter>
         <GlobalMilestoneNotifier />
         <ThemeToggle />
+        <BottomNavBar />
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
