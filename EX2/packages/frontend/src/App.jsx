@@ -12,6 +12,7 @@ const EnglishArena = lazy(() => import('./features/arena/presentation/EnglishAre
 import { useUserStore } from './features/user/data/userStore';
 import { useGamificationStore } from './features/gamification/data/gamificationStore';
 import MilestoneToast from './features/gamification/presentation/MilestoneToast';
+import ThemeToggle from './components/ThemeToggle';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -57,6 +58,7 @@ export default function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <GlobalMilestoneNotifier />
+        <ThemeToggle />
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
