@@ -27,6 +27,9 @@ export default function EnglishArena() {
   useEffect(() => {
     if (audioRef.current && remoteStream) {
       audioRef.current.srcObject = remoteStream;
+      audioRef.current.play().catch((err) => {
+        console.error("Audio play failed or was blocked by browser policy:", err);
+      });
     }
   }, [remoteStream]);
 
@@ -62,7 +65,7 @@ export default function EnglishArena() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-12 flex flex-col items-center" dir="rtl">
-      {remoteStream && <audio ref={audioRef} autoPlay />}
+      {remoteStream && <audio ref={audioRef} autoPlay playsInline />}
 
       <div className="w-full max-w-4xl flex justify-between items-center mb-10">
         <button
