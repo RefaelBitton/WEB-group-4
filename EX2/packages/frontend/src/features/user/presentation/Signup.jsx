@@ -27,22 +27,22 @@ export default function Signup() {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen flex items-center justify-center bg-blue-50 font-sans">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <div dir="rtl" className="min-h-screen flex items-center justify-center bg-blue-50 dark:bg-slate-950 font-sans transition-colors duration-300 p-4">
+      <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100 dark:border-slate-800 transition-colors duration-300">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-indigo-600 mb-2">הרשמה</h1>
-          <p className="text-gray-500">צרו חשבון הורה חדש</p>
+          <h1 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">הרשמה</h1>
+          <p className="text-gray-500 dark:text-gray-400">צרו חשבון הורה חדש</p>
         </div>
         
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-6 text-sm text-center">
+          <div className="bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 p-3 rounded-lg mb-6 text-sm text-center border border-red-100 dark:border-red-900/50">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSignup} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">שם מלא</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">שם מלא</label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                 <UserIcon className="h-5 w-5 text-gray-400" />
@@ -51,7 +51,7 @@ export default function Signup() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full pl-3 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-900"
+                className="w-full pl-3 pr-10 py-3 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white transition-colors duration-300"
                 placeholder="הכנס שם מלא"
                 required
               />
@@ -59,7 +59,7 @@ export default function Signup() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">דוא״ל</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">דוא״ל</label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                 <Mail className="h-5 w-5 text-gray-400" />
@@ -68,7 +68,7 @@ export default function Signup() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-3 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-900"
+                className="w-full pl-3 pr-10 py-3 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white transition-colors duration-300"
                 placeholder="הכנס דוא״ל"
                 required
               />
@@ -76,7 +76,7 @@ export default function Signup() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">סיסמה</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">סיסמה</label>
             <div className="relative">
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                 <Lock className="h-5 w-5 text-gray-400" />
@@ -85,7 +85,7 @@ export default function Signup() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-3 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-900"
+                className="w-full pl-3 pr-10 py-3 border border-gray-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white transition-colors duration-300"
                 placeholder="לפחות 6 תווים"
                 required
               />
@@ -95,14 +95,14 @@ export default function Signup() {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:from-indigo-600 hover:to-purple-700 transform transition-transform hover:-translate-y-0.5 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+            className={`w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:from-indigo-600 hover:to-purple-700 transform transition-transform hover:-translate-y-0.5 ${isLoading ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}`}
           >
             {isLoading ? 'יוצר חשבון...' : 'הרשמה'}
           </button>
         </form>
         
-        <p className="mt-8 text-center text-gray-600">
-          כבר יש לכם חשבון? <Link to="/login" className="text-indigo-600 font-semibold hover:underline">התחברו כאן</Link>
+        <p className="mt-8 text-center text-gray-600 dark:text-gray-400">
+          כבר יש לכם חשבון? <Link to="/login" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">התחברו כאן</Link>
         </p>
       </div>
     </div>
