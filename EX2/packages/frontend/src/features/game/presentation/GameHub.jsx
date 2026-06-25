@@ -17,7 +17,12 @@ export function GameHub() {
     currentQuestion, 
     answerGame, 
     gameFinished, 
-    questionsPlayedCount 
+    questionsPlayedCount,
+    sessionScore,
+    selectedOptionId,
+    correctOptionId,
+    isAnswering,
+    showPointsToast,
   } = useGame();
   
   const navigate = useNavigate();
@@ -48,7 +53,7 @@ export function GameHub() {
               כל הכבוד! סיימת את המשחק! 🎉
             </h2>
             <p className="text-xl text-slate-500 mb-8 max-w-md leading-relaxed">
-              ענית בהצלחה על <strong>{questionsPlayedCount}</strong> שאלות ב<strong>{selectedGame.name}</strong>.
+              ענית בהצלחה על <strong>{questionsPlayedCount}</strong> שאלות ב<strong>{selectedGame.name}</strong> וצברת <strong>{sessionScore}</strong> נקודות! 🏆
               הרווחת <strong>30 נקודות בונוס</strong> לדרגת גיבור הדקדוק שלך! 🏆
             </p>
 
@@ -70,22 +75,97 @@ export function GameHub() {
           </div>
         </section>
       );
-    } else if (selectedGame.id === "image-recognition") {
-      content = <ImageRecognition questionData={currentQuestion} loading={loading} onAnswerSubmit={(ansId) => answerGame(selectedGame.id, { answerId: ansId })} onBack={() => selectGame(null)} />;
-    } else if (selectedGame.id === "sentence-completion") {
-      content = <SentenceCompletion questionData={currentQuestion} loading={loading} onAnswerSubmit={(ansId) => answerGame(selectedGame.id, { answerId: ansId })} onBack={() => selectGame(null)} />;
-    } else if (selectedGame.id === "quick-translation") {
-      content = <QuickTranslation questionData={currentQuestion} loading={loading} onAnswerSubmit={(ansId) => answerGame(selectedGame.id, { answerId: ansId })} onBack={() => selectGame(null)} />;
     } else {
-      content = (
-        <section className="rounded-[2.5rem] border border-slate-200 bg-white p-12 shadow-sm text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-6">{selectedGame.name}</h2>
-          <p className="text-xl text-slate-500 mb-8">המשחק עדיין בפיתוח.</p>
-          <button onClick={() => selectGame(null)} className="px-6 py-3 bg-slate-100 rounded-xl text-slate-700 hover:bg-slate-200 font-medium transition-colors cursor-pointer">
-            חזור למרכז המשחקים
-          </button>
-        </section>
+      const progressPercent = Math.min(100, (questionsPlayedCount / 5) * 100);
+
+      const gameHeader = (
+        <div className="w-full bg-white border border-slate-200 rounded-3xl p-5 mb-8 shadow-sm flex items-center justify-between gap-4">
+          {/* Left Side: Game details & Progress */}
+          <div className="flex flex-col gap-2 flex-grow">
+            <div className="flex justify-between text-lg font-bold text-slate-700">
+              <span>{selectedGame.name}</span>
+              <span>שאלה {Math.min(5, questionsPlayedCount + 1)} מתוך 5</span>
+            </div>
+            {/* Progress Bar Container */}
+            <div className="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden border border-slate-200/50">
+              <div 
+                className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-full rounded-full transition-all duration-500" 
+                style={{ width: `${progressPercent}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Right Side: Score indicator */}
+          <div className="relative flex flex-col items-center justify-center bg-amber-50 border border-amber-200 px-6 py-3.5 rounded-2xl min-w-32 shadow-sm">
+            {showPointsToast && (
+              <span className="absolute -top-6 text-xl font-extrabold text-amber-500 animate-float-up" dir="ltr">
+                +10
+              </span>
+            )}
+            <span className="text-xs font-semibold text-amber-600/80">ניקוד נוכחי</span>
+            <span className="text-2xl font-black text-amber-600 flex items-center gap-1.5 mt-0.5 animate-pulse-gold">
+              {sessionScore} <Trophy className="w-5.5 h-5.5 text-amber-500 inline fill-amber-400" />
+            </span>
+          </div>
+        </div>
       );
+
+      if (selectedGame.id === "image-recognition") {
+        content = (
+          <div className="w-full">
+            {gameHeader}
+            <ImageRecognition 
+              questionData={currentQuestion} 
+              loading={loading || isAnswering} 
+              onAnswerSubmit={(ansId) => answerGame(selectedGame.id, { answerId: ansId })} 
+              onBack={() => selectGame(null)} 
+              selectedOptionId={selectedOptionId}
+              correctOptionId={correctOptionId}
+              isAnswering={isAnswering}
+            />
+          </div>
+        );
+      } else if (selectedGame.id === "sentence-completion") {
+        content = (
+          <div className="w-full">
+            {gameHeader}
+            <SentenceCompletion 
+              questionData={currentQuestion} 
+              loading={loading || isAnswering} 
+              onAnswerSubmit={(ansId) => answerGame(selectedGame.id, { answerId: ansId })} 
+              onBack={() => selectGame(null)} 
+              selectedOptionId={selectedOptionId}
+              correctOptionId={correctOptionId}
+              isAnswering={isAnswering}
+            />
+          </div>
+        );
+      } else if (selectedGame.id === "quick-translation") {
+        content = (
+          <div className="w-full">
+            {gameHeader}
+            <QuickTranslation 
+              questionData={currentQuestion} 
+              loading={loading || isAnswering} 
+              onAnswerSubmit={(ansId) => answerGame(selectedGame.id, { answerId: ansId })} 
+              onBack={() => selectGame(null)} 
+              selectedOptionId={selectedOptionId}
+              correctOptionId={correctOptionId}
+              isAnswering={isAnswering}
+            />
+          </div>
+        );
+      } else {
+        content = (
+          <section className="rounded-[2.5rem] border border-slate-200 bg-white p-12 shadow-sm text-center">
+            <h2 className="text-3xl font-bold text-slate-900 mb-6">{selectedGame.name}</h2>
+            <p className="text-xl text-slate-500 mb-8">המשחק עדיין בפיתוח.</p>
+            <button onClick={() => selectGame(null)} className="px-6 py-3 bg-slate-100 rounded-xl text-slate-700 hover:bg-slate-200 font-medium transition-colors cursor-pointer">
+              חזור למרכז המשחקים
+            </button>
+          </section>
+        );
+      }
     }
   } else {
     const availableGames = games.length
