@@ -1,0 +1,24 @@
+{
+  "name": "english-learning-bot-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev -w packages/frontend",
+    "dev:api-gateway": "npm run dev -w packages/api-gateway",
+    "dev:user-service": "npm run dev -w packages/user-service",
+    "dev:bot-service": "npm run dev -w packages/bot-service",
+    "dev:game-service": "npm run dev -w packages/game-service",
+    "dev:reporting-service": "npm run dev -w packages/reporting-service",
+    "test:reporting": "node verify_reporting.js",
+    "start": "node start-production.mjs",
+    "dev": "concurrently -k -n \"front,api,user,bot,game,rep\" -c \"cyan,green,yellow,blue,magenta,red\" \"npm run dev:frontend\" \"cd packages/api-gateway && node --watch index.js\" \"cd packages/user-service && node --watch index.js\" \"cd packages/bot-service && node --watch index.js\" \"cd packages/game-service && node --watch index.js\" \"cd packages/reporting-service && node --watch index.js\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "3.8.3",
+    "vite": "^6.4.3"
+  }
+}
