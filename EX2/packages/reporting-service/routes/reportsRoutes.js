@@ -83,7 +83,7 @@ router.get("/:userId", async (req, res) => {
     const GAME_MAPPING = {
       "image-recognition": "זיהוי תמונות 🖼️",
       "sentence-completion": "השלמת משפטים ✍️",
-      "quick-translation": "תרגום מהיר 🌐",
+      "quick-translation": "תרגום מילים בודדות 🌐",
     };
 
     activities.forEach((act) => {

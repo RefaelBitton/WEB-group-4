@@ -33,7 +33,7 @@ export const gameTypes = [
   },
   {
     id: "quick-translation",
-    name: "תרגום מהיר",
+    name: "תרגום מילים בודדות",
     description: "תרגום מילים פשוטות מעברית לאנגלית.",
     questions: quickTranslationQuestions,
   },
