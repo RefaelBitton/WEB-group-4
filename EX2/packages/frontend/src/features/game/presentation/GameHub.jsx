@@ -192,7 +192,7 @@ export function GameHub() {
       : [
           { id: "image-recognition", name: "משחק זיהוי תמונות" },
           { id: "sentence-completion", name: "השלמת משפטים" },
-          { id: "quick-translation", name: "תרגום מהיר" },
+          { id: "quick-translation", name: "תרגום מילים בודדות" },
         ];
 
     content = (

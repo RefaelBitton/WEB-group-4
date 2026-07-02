@@ -13,7 +13,7 @@ export function QuickTranslation({
 
   return (
     <section className="rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 md:p-12 shadow-sm text-center transition-colors duration-300">
-      <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">תרגום מהיר</h2>
+      <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">תרגום מילים בודדות</h2>
       <p className="text-xl text-slate-505 dark:text-slate-400 mb-8">תרגמו את המילה שמוצגת לאנגלית.</p>
       
       <div className="bg-purple-50 dark:bg-purple-950/20 rounded-3xl p-10 text-center mb-8 border border-purple-100 dark:border-purple-900/30 transition-colors">
