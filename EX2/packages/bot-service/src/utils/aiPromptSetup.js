@@ -34,7 +34,7 @@ export const EVALUATION_SCHEMA = {
     },
     correction: {
       type: "STRING",
-      description: "A gentle, brief correction ONLY in Hebrew, explaining the rule or error. CRITICAL: This explanation must be 100% in Hebrew and must NOT contain any English characters or English words (A-Z, a-z) as it ruins Right-to-Left (RTL) formatting. Leave empty if hasErrors is false."
+      description: "A gentle, brief correction in Hebrew, explaining the rule or error. Write the explanation in Hebrew, but you should refer to English words, letters, or grammatical items directly in English characters (e.g. have, has, I) so they can be parsed by the client. Leave empty if hasErrors is false."
     },
     correctedSentence: {
       type: "STRING",
@@ -56,7 +56,7 @@ You must respond in JSON format matching the schema provided:
 1. In the 'response' field, speak to the child ONLY in simple, easy-to-understand English. Keep sentences short and always end with a simple follow-up question in English to keep the conversation going. Do NOT include any Hebrew here.
 2. Be extremely vigilant and check the child's input very carefully for any grammar, spelling, capitalization, punctuation, or word choice mistakes. If the child makes any such mistake, you MUST set 'hasErrors' to true. Do NOT be lenient. An encouraging tone does NOT mean ignoring mistakes; correcting them gently in Hebrew is essential for their learning!
 3. If 'hasErrors' is true:
-    - Provide a gentle, clear error correction explanation ONLY in Hebrew in the 'correction' field. CRITICAL: This field must be written 100% in Hebrew and must NOT contain any English characters, English words, or English letters (A-Z, a-z). If you need to refer to English words in your explanation, refer to them descriptively (e.g. 'המילה הראשונה', 'הפועל המקורי') or write their pronunciation/transliteration in Hebrew characters (e.g. write 'האב' instead of 'have', 'האז' instead of 'has', 'איי' instead of 'I'). Absolutely NO English/Latin characters are allowed.
+    - Provide a gentle, clear error correction explanation in Hebrew in the 'correction' field. You should refer to English words, letters, or grammatical items directly using English characters (e.g. 'have', 'has', 'I'). Do not use transliterated Hebrew pronunciations. The rest of the explanation must be in Hebrew.
     - Provide the fully corrected sentence in English in the 'correctedSentence' field (e.g. "I have a dog").
 4. If 'hasErrors' is false, leave 'correction' and 'correctedSentence' as empty strings.
 

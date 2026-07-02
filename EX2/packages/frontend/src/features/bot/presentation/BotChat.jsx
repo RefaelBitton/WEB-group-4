@@ -20,6 +20,28 @@ const renderHighlightedText = (text) => {
   });
 };
 
+const renderHebrewWithEnglishBadges = (text) => {
+  if (!text) return null;
+  // Regex to split by English words or phrases (allowing letters, numbers, hyphens, and apostrophes)
+  const regex = /([a-zA-Z0-9'-]+(?:\s+[a-zA-Z0-9'-]+)*)/g;
+  const parts = text.split(regex);
+
+  return parts.map((part, index) => {
+    if (/[a-zA-Z]/.test(part)) {
+      return (
+        <bdi 
+          key={index} 
+          className="bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded-lg font-mono text-sm mx-1 inline-block border border-indigo-100/50 dark:border-indigo-900/30 shadow-sm" 
+          dir="ltr"
+        >
+          {part}
+        </bdi>
+      );
+    }
+    return <span key={index}>{part}</span>;
+  });
+};
+
 export function BotChat() {
   const { 
     messages, input, setInput, sendMessage, 
@@ -115,9 +137,9 @@ export function BotChat() {
                             {message.evaluation.correction && (
                               <div 
                                 dir="rtl" 
-                                className="text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/50 dark:border-rose-900/30 rounded-2xl p-3 mt-2 text-sm font-semibold shadow-sm w-full block text-right"
+                                className="text-rose-600 dark:text-rose-455 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/50 dark:border-rose-900/30 rounded-2xl p-3 mt-2 text-sm font-semibold shadow-sm w-full block text-right leading-relaxed"
                               >
-                                {message.evaluation.correction}
+                                {renderHebrewWithEnglishBadges(message.evaluation.correction)}
                               </div>
                             )}
                             {message.evaluation.correctedSentence && (

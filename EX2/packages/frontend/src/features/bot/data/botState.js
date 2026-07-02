@@ -3,6 +3,14 @@ import { getConversationStarter, sendMessageToBot, transcribeAudio } from "../lo
 import { useUserStore } from "../../user/data/userStore.js";
 import { useGamificationStore } from "../../gamification/data/gamificationStore.js";
 
+// Trigger voice loading as early as possible in Chromium-based browsers
+if (typeof window !== "undefined" && window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    window.speechSynthesis.getVoices();
+  };
+  window.speechSynthesis.getVoices();
+}
+
 export function useBot() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -17,9 +25,23 @@ export function useBot() {
     return localStorage.getItem("bot_voice_enabled") === "true";
   });
 
+  const unlockSpeech = () => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      try {
+        const utterance = new SpeechSynthesisUtterance("");
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.warn("Failed to unlock speech synthesis:", e);
+      }
+    }
+  };
+
   const setVoiceEnabled = (val) => {
     setVoiceEnabledState(val);
     localStorage.setItem("bot_voice_enabled", val ? "true" : "false");
+    if (val) {
+      unlockSpeech();
+    }
   };
 
   const usedMicForMessage = useRef(false);
@@ -38,6 +60,9 @@ export function useBot() {
 
   async function sendMessage() {
     if (!input.trim()) return;
+    
+    // Unlock Speech Synthesis inside user gesture before fetching
+    unlockSpeech();
     
     const userMessageText = input.trim();
     const wasMicUsed = usedMicForMessage.current;
@@ -96,6 +121,7 @@ export function useBot() {
   }
 
   const toggleRecording = async () => {
+    unlockSpeech();
     if (isRecording) {
       if (mediaRecorderRef.current?.state === "recording") {
         mediaRecorderRef.current.stop();
@@ -216,20 +242,28 @@ export function useBot() {
 
   const speakText = (text) => {
     if (!window.speechSynthesis) return;
-    
-    // Stop any ongoing speech and ensure the engine isn't paused/stuck
+
+    // Filter out Hebrew characters/lines and metadata to speak only English
+    const cleanText = text
+      .split("\n")
+      .filter(line => !/[\u0590-\u05FF]/.test(line) && !line.trim().startsWith("Correct:"))
+      .join(" ")
+      .trim();
+
+    if (!cleanText) return;
+
+    // Stop any ongoing speech
     window.speechSynthesis.cancel();
+
+    // Chrome bug workaround: always resume to clear any stuck paused state
     if (window.speechSynthesis.paused) {
       window.speechSynthesis.resume();
     }
-    
-    // Filter out the Hebrew Correction part to speak only English
-    const englishText = text.split(/\n\n\(Hebrew Correction:/)[0].trim();
-    if (!englishText) return;
 
+    // Use a slightly longer delay (200ms) to ensure Chromium finishes cancel operations
     setTimeout(() => {
       try {
-        const utterance = new SpeechSynthesisUtterance(englishText);
+        const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = "en-US";
 
         // Prevent garbage collection of the active utterance object
@@ -238,7 +272,14 @@ export function useBot() {
         // Select an English voice if available
         const voices = window.speechSynthesis.getVoices();
         if (voices && voices.length > 0) {
-          const enVoice = voices.find(v => v.lang.startsWith("en-US") || v.lang.startsWith("en-GB") || v.lang.startsWith("en")) || voices[0];
+          // Do not fall back to voices[0] unless it is actually English.
+          // Fallback to undefined so browser defaults to standard English TTS handler.
+          const enVoice = voices.find(v => 
+            v.lang.startsWith("en-US") || 
+            v.lang.startsWith("en-GB") || 
+            v.lang.startsWith("en-") || 
+            v.lang.toLowerCase() === "en"
+          );
           if (enVoice) {
             utterance.voice = enVoice;
           }
@@ -249,10 +290,15 @@ export function useBot() {
         };
 
         window.speechSynthesis.speak(utterance);
+
+        // Precaution: ensure synthesis resumes if it somehow got paused
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
       } catch (err) {
         console.error("Failed to speak text:", err);
       }
-    }, 100);
+    }, 200);
   };
 
   return {
