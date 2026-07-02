@@ -224,17 +224,21 @@ export function useBot() {
     const englishText = text.split(/\n\n\(Hebrew Correction:/)[0].trim();
     if (!englishText) return;
 
-    const utterance = new SpeechSynthesisUtterance(englishText);
-    utterance.lang = "en-US";
+    setTimeout(() => {
+      const utterance = new SpeechSynthesisUtterance(englishText);
+      utterance.lang = "en-US";
 
-    // Select an English voice if available
-    const voices = window.speechSynthesis.getVoices();
-    const enVoice = voices.find(v => v.lang.startsWith("en-US") || v.lang.startsWith("en-GB") || v.lang.startsWith("en")) || voices[0];
-    if (enVoice) {
-      utterance.voice = enVoice;
-    }
+      // Select an English voice if available
+      const voices = window.speechSynthesis.getVoices();
+      if (voices && voices.length > 0) {
+        const enVoice = voices.find(v => v.lang.startsWith("en-US") || v.lang.startsWith("en-GB") || v.lang.startsWith("en")) || voices[0];
+        if (enVoice) {
+          utterance.voice = enVoice;
+        }
+      }
 
-    window.speechSynthesis.speak(utterance);
+      window.speechSynthesis.speak(utterance);
+    }, 100);
   };
 
   return {

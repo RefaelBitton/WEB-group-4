@@ -115,9 +115,9 @@ export function BotChat() {
                             {message.evaluation.correction && (
                               <div 
                                 dir="rtl" 
-                                className="text-rose-600 dark:text-rose-455 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/50 dark:border-rose-900/30 rounded-2xl p-3 mt-2 text-sm font-semibold shadow-sm w-full block text-right"
+                                className="text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/50 dark:border-rose-900/30 rounded-2xl p-3 mt-2 text-sm font-semibold shadow-sm w-full block text-right"
                               >
-                                {renderHighlightedText(message.evaluation.correction)}
+                                {message.evaluation.correction}
                               </div>
                             )}
                             {message.evaluation.correctedSentence && (

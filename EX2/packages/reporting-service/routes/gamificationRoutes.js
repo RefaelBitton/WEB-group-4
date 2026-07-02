@@ -65,57 +65,6 @@ const checkAndAwardAutomaticAchievements = async (progress) => {
   return newAchievementAwarded;
 };
 
-// GET /api/reports/gamification/:userId - Fetch rank and points
-router.get("/:userId", async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    if (!isDbConnected()) {
-      if (!inMemoryProgress.has(userId)) {
-        inMemoryProgress.set(userId, { userId, points: 0, rank: "Beginner", achievements: [], purchasedItems: [], activeTheme: "default", activeTrinkets: [] });
-      }
-      const progress = inMemoryProgress.get(userId);
-      const autoAward = await checkAndAwardAutomaticAchievements(progress);
-      if (autoAward) {
-        if (!progress.achievements.includes(autoAward)) {
-          progress.achievements.push(autoAward);
-          progress.points += 50;
-          progress.rank = calculateRank(progress.points);
-        }
-      }
-      return res.json({
-        points: progress.points,
-        rank: progress.rank,
-        achievements: progress.achievements,
-        purchasedItems: progress.purchasedItems || [],
-        activeTheme: progress.activeTheme || "default",
-        activeTrinkets: progress.activeTrinkets || []
-      });
-    }
-
-    let progress = await Progress.findOne({ userId });
-
-    if (!progress) {
-      // Return default if not started yet
-      return res.json({ points: 0, rank: "Beginner", achievements: [], purchasedItems: [], activeTheme: "default", activeTrinkets: [] });
-    }
-
-    // Automatically check and award any system achievements
-    await checkAndAwardAutomaticAchievements(progress);
-
-    res.json({
-      points: progress.points,
-      rank: progress.rank,
-      achievements: progress.achievements,
-      purchasedItems: progress.purchasedItems || [],
-      activeTheme: progress.activeTheme || "default",
-      activeTrinkets: progress.activeTrinkets || []
-    });
-  } catch (error) {
-    console.error("Error fetching gamification progress:", error);
-    res.status(500).json({ error: "Failed to fetch gamification progress" });
-  }
-});
 
 // POST /api/reports/gamification/award - Award points and badges
 router.post("/award", async (req, res) => {
@@ -604,6 +553,58 @@ router.post("/store/equip", async (req, res) => {
   } catch (error) {
     console.error("Error equipping item:", error);
     res.status(500).json({ error: "Failed to equip item" });
+  }
+});
+
+// GET /api/reports/gamification/:userId - Fetch rank and points
+router.get("/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!isDbConnected()) {
+      if (!inMemoryProgress.has(userId)) {
+        inMemoryProgress.set(userId, { userId, points: 0, rank: "Beginner", achievements: [], purchasedItems: [], activeTheme: "default", activeTrinkets: [] });
+      }
+      const progress = inMemoryProgress.get(userId);
+      const autoAward = await checkAndAwardAutomaticAchievements(progress);
+      if (autoAward) {
+        if (!progress.achievements.includes(autoAward)) {
+          progress.achievements.push(autoAward);
+          progress.points += 50;
+          progress.rank = calculateRank(progress.points);
+        }
+      }
+      return res.json({
+        points: progress.points,
+        rank: progress.rank,
+        achievements: progress.achievements,
+        purchasedItems: progress.purchasedItems || [],
+        activeTheme: progress.activeTheme || "default",
+        activeTrinkets: progress.activeTrinkets || []
+      });
+    }
+
+    let progress = await Progress.findOne({ userId });
+
+    if (!progress) {
+      // Return default if not started yet
+      return res.json({ points: 0, rank: "Beginner", achievements: [], purchasedItems: [], activeTheme: "default", activeTrinkets: [] });
+    }
+
+    // Automatically check and award any system achievements
+    await checkAndAwardAutomaticAchievements(progress);
+
+    res.json({
+      points: progress.points,
+      rank: progress.rank,
+      achievements: progress.achievements,
+      purchasedItems: progress.purchasedItems || [],
+      activeTheme: progress.activeTheme || "default",
+      activeTrinkets: progress.activeTrinkets || []
+    });
+  } catch (error) {
+    console.error("Error fetching gamification progress:", error);
+    res.status(500).json({ error: "Failed to fetch gamification progress" });
   }
 });
 
