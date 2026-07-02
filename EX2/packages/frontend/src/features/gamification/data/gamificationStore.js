@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import io from "socket.io-client";
-import { fetchGamificationStats, awardGamificationPoints } from "../logic/gamificationApi";
+import { 
+  fetchGamificationStats, 
+  awardGamificationPoints,
+  fetchLeaderboard,
+  fetchStoreItems,
+  buyStoreItem,
+  equipStoreItem
+} from "../logic/gamificationApi";
 
 const getWsUrl = () => {
   return import.meta.env.VITE_API_URL ?? "http://localhost:4000";
@@ -12,6 +19,11 @@ export const useGamificationStore = create((set, get) => ({
   points: 0,
   rank: "Beginner",
   achievements: [],
+  purchasedItems: [],
+  activeTheme: "default",
+  activeTrinkets: [],
+  leaderboard: [],
+  storeItems: [],
   loading: false,
   error: null,
   milestonePopup: null, // { type: 'rank'|'badge', name: string }
@@ -51,6 +63,9 @@ export const useGamificationStore = create((set, get) => ({
         points: data.points,
         rank: data.rank,
         achievements: data.achievements,
+        purchasedItems: data.purchasedItems || [],
+        activeTheme: data.activeTheme || "default",
+        activeTrinkets: data.activeTrinkets || [],
       });
       get().initSocket(userId);
     } catch (err) {
@@ -69,6 +84,9 @@ export const useGamificationStore = create((set, get) => ({
           points: res.totalPoints,
           rank: res.newRank || get().rank,
           achievements: res.achievements,
+          purchasedItems: res.purchasedItems || get().purchasedItems,
+          activeTheme: res.activeTheme || get().activeTheme,
+          activeTrinkets: res.activeTrinkets || get().activeTrinkets,
         });
 
         // Emit event to socket gateway so it broadcasts the milestone event
@@ -85,6 +103,68 @@ export const useGamificationStore = create((set, get) => ({
       }
     } catch (err) {
       set({ error: err.message });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  loadLeaderboard: async () => {
+    set({ loading: true, error: null });
+    try {
+      const data = await fetchLeaderboard();
+      set({ leaderboard: data });
+    } catch (err) {
+      set({ error: err.message });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  loadStoreItems: async () => {
+    set({ loading: true, error: null });
+    try {
+      const data = await fetchStoreItems();
+      set({ storeItems: data });
+    } catch (err) {
+      set({ error: err.message });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  buyItem: async (userId, itemId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await buyStoreItem(userId, itemId);
+      if (res.success) {
+        set({
+          points: res.points,
+          purchasedItems: res.purchasedItems,
+          activeTheme: res.activeTheme || "default",
+          activeTrinkets: res.activeTrinkets || []
+        });
+      }
+    } catch (err) {
+      set({ error: err.message });
+      throw err;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  equipItem: async (userId, itemId, category) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await equipStoreItem(userId, itemId, category);
+      if (res.success) {
+        set({
+          activeTheme: res.activeTheme || "default",
+          activeTrinkets: res.activeTrinkets || []
+        });
+      }
+    } catch (err) {
+      set({ error: err.message });
+      throw err;
     } finally {
       set({ loading: false });
     }

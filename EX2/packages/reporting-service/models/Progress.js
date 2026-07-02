@@ -19,6 +19,18 @@ const progressSchema = new mongoose.Schema({
   achievements: {
     type: [String],
     default: []
+  },
+  purchasedItems: {
+    type: [String],
+    default: []
+  },
+  activeTheme: {
+    type: String,
+    default: 'default'
+  },
+  activeTrinkets: {
+    type: [String],
+    default: []
   }
 }, { timestamps: true });
 

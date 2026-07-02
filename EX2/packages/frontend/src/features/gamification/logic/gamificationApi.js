@@ -19,3 +19,45 @@ export async function awardGamificationPoints(userId, eventType) {
   }
   return response.json();
 }
+
+export async function fetchLeaderboard() {
+  const response = await fetch(`${API_BASE}/api/reports/gamification/leaderboard`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch leaderboard");
+  }
+  return response.json();
+}
+
+export async function fetchStoreItems() {
+  const response = await fetch(`${API_BASE}/api/reports/gamification/store/items`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch store items");
+  }
+  return response.json();
+}
+
+export async function buyStoreItem(userId, itemId) {
+  const response = await fetch(`${API_BASE}/api/reports/gamification/store/buy`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, itemId }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || "Failed to buy item");
+  }
+  return response.json();
+}
+
+export async function equipStoreItem(userId, itemId, category) {
+  const response = await fetch(`${API_BASE}/api/reports/gamification/store/equip`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, itemId, category }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || "Failed to equip item");
+  }
+  return response.json();
+}

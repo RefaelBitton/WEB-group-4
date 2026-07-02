@@ -1,10 +1,23 @@
 import express from "express";
+import mongoose from "mongoose";
 import Progress from "../models/Progress.js";
 import GameSession from "../models/GameSession.js";
 import ActivityLog from "../models/ActivityLog.js";
 import { isDbConnected, inMemoryProgress, inMemoryActivities } from "../utils/dbFallback.js";
 
 const router = express.Router();
+
+const STORE_ITEMS = [
+  { id: "cosmic-space", category: "theme", cost: 100, name: "חלל קוסמי", description: "ערכת עיצוב סגולה-ורודה עם כוכבים נוצצים" },
+  { id: "sunset-safari", category: "theme", cost: 150, name: "ספארי שקיעה", description: "ערכת עיצוב כתומה-צהובה חמימה" },
+  { id: "deep-sea", category: "theme", cost: 200, name: "מצולות הים", description: "ערכת עיצוב כחולה-טורקיז מרגיעה" },
+  { id: "rainbow-theme", category: "theme", cost: 300, name: "קשת בענן", description: "ערכת עיצוב צבעונית עם גווני קשת דינמיים" },
+  { id: "pet-dragon", category: "trinket", cost: 200, name: "דרקון מחמד", description: "דרקון קטן וחמוד המרחף בפינת המסך" },
+  { id: "sparkle-trail", category: "trinket", cost: 150, name: "שובל כוכבים", description: "שובל כוכבים נוצצים שעוקב אחרי העכבר" },
+  { id: "golden-crown", category: "trinket", cost: 250, name: "כתר זהב", description: "כתר נוצץ מעל האוואטר וליד השם" },
+  { id: "friendly-ghost", category: "trinket", cost: 120, name: "רוח רפאים חברותית", description: "רוח רפאים מתוקה ומרחפת שתעודד אותך" },
+  { id: "snowfall-effect", category: "trinket", cost: 180, name: "פתיתי שלג נופלים", description: "פתיתי שלג עדינים שנושרים לאט על המסך" }
+];
 
 // Helper to determine rank based on points
 const calculateRank = (points) => {
@@ -59,19 +72,24 @@ router.get("/:userId", async (req, res) => {
 
     if (!isDbConnected()) {
       if (!inMemoryProgress.has(userId)) {
-        inMemoryProgress.set(userId, { userId, points: 0, rank: "Beginner", achievements: [] });
+        inMemoryProgress.set(userId, { userId, points: 0, rank: "Beginner", achievements: [], purchasedItems: [], activeTheme: "default", activeTrinkets: [] });
       }
       const progress = inMemoryProgress.get(userId);
       const autoAward = await checkAndAwardAutomaticAchievements(progress);
       if (autoAward) {
-        progress.achievements.push(autoAward);
-        progress.points += 50;
-        progress.rank = calculateRank(progress.points);
+        if (!progress.achievements.includes(autoAward)) {
+          progress.achievements.push(autoAward);
+          progress.points += 50;
+          progress.rank = calculateRank(progress.points);
+        }
       }
       return res.json({
         points: progress.points,
         rank: progress.rank,
         achievements: progress.achievements,
+        purchasedItems: progress.purchasedItems || [],
+        activeTheme: progress.activeTheme || "default",
+        activeTrinkets: progress.activeTrinkets || []
       });
     }
 
@@ -79,7 +97,7 @@ router.get("/:userId", async (req, res) => {
 
     if (!progress) {
       // Return default if not started yet
-      return res.json({ points: 0, rank: "Beginner", achievements: [] });
+      return res.json({ points: 0, rank: "Beginner", achievements: [], purchasedItems: [], activeTheme: "default", activeTrinkets: [] });
     }
 
     // Automatically check and award any system achievements
@@ -89,6 +107,9 @@ router.get("/:userId", async (req, res) => {
       points: progress.points,
       rank: progress.rank,
       achievements: progress.achievements,
+      purchasedItems: progress.purchasedItems || [],
+      activeTheme: progress.activeTheme || "default",
+      activeTrinkets: progress.activeTrinkets || []
     });
   } catch (error) {
     console.error("Error fetching gamification progress:", error);
@@ -234,6 +255,9 @@ router.post("/award", async (req, res) => {
         newRank: rankUp ? newRank : null,
         newAchievement: finalNewAchievement,
         achievements: progress.achievements,
+        purchasedItems: progress.purchasedItems || [],
+        activeTheme: progress.activeTheme || "default",
+        activeTrinkets: progress.activeTrinkets || []
       });
     }
 
@@ -390,10 +414,196 @@ router.post("/award", async (req, res) => {
       newRank: rankUp ? newRank : null,
       newAchievement: finalNewAchievement,
       achievements: progress.achievements,
+      purchasedItems: progress.purchasedItems || [],
+      activeTheme: progress.activeTheme || "default",
+      activeTrinkets: progress.activeTrinkets || []
     });
   } catch (error) {
     console.error("Error awarding gamification points:", error);
     res.status(500).json({ error: "Failed to award gamification points" });
+  }
+});
+
+// GET /api/reports/gamification/leaderboard - Fetch top players
+router.get("/leaderboard", async (req, res) => {
+  try {
+    if (!isDbConnected()) {
+      const fallbackList = Array.from(inMemoryProgress.values()).map(p => ({
+        userId: p.userId,
+        name: p.userId === "mock-child-id" ? "נועם" : (p.username || "משתמש"),
+        points: p.points || 0,
+        rank: p.rank || "Beginner",
+        activeTrinkets: p.activeTrinkets || []
+      }));
+      const mockPlayers = [
+        { userId: "mock1", name: "שירה", points: 780, rank: "Advanced Learner", activeTrinkets: [] },
+        { userId: "mock2", name: "דניאל", points: 650, rank: "Advanced Learner", activeTrinkets: [] },
+        { userId: "mock3", name: "רוני", points: 420, rank: "Intermediate Learner", activeTrinkets: [] },
+        { userId: "mock4", name: "יובל", points: 95, rank: "Beginner", activeTrinkets: [] }
+      ];
+      const combined = [...fallbackList, ...mockPlayers].sort((a, b) => b.points - a.points);
+      return res.json(combined);
+    }
+
+    const progressList = await Progress.find({}).sort({ points: -1 }).limit(10);
+    const leaderboard = [];
+    
+    for (const prog of progressList) {
+      const user = await mongoose.connection.db.collection("users").findOne({ _id: prog.userId });
+      leaderboard.push({
+        userId: prog.userId,
+        name: user ? user.name : "תלמיד",
+        points: prog.points,
+        rank: prog.rank,
+        activeTrinkets: prog.activeTrinkets || []
+      });
+    }
+
+    res.json(leaderboard.sort((a, b) => b.points - a.points));
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    res.status(500).json({ error: "Failed to fetch leaderboard" });
+  }
+});
+
+// GET /api/reports/gamification/store/items - Fetch available items
+router.get("/store/items", (req, res) => {
+  res.json(STORE_ITEMS);
+});
+
+// POST /api/reports/gamification/store/buy - Purchase item
+router.post("/store/buy", async (req, res) => {
+  try {
+    const { userId, itemId } = req.body;
+    if (!userId || !itemId) {
+      return res.status(400).json({ error: "userId and itemId are required" });
+    }
+
+    const item = STORE_ITEMS.find(i => i.id === itemId);
+    if (!item) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    if (!isDbConnected()) {
+      if (!inMemoryProgress.has(userId)) {
+        inMemoryProgress.set(userId, { userId, points: 0, rank: "Beginner", achievements: [], purchasedItems: [], activeTheme: "default", activeTrinkets: [] });
+      }
+      const progress = inMemoryProgress.get(userId);
+      if (!progress.purchasedItems) progress.purchasedItems = [];
+      if (progress.purchasedItems.includes(itemId)) {
+        return res.status(400).json({ error: "Item already purchased" });
+      }
+      if (progress.points < item.cost) {
+        return res.status(400).json({ error: "Insufficient points" });
+      }
+      progress.points -= item.cost;
+      progress.purchasedItems.push(itemId);
+      return res.json({
+        success: true,
+        points: progress.points,
+        purchasedItems: progress.purchasedItems,
+        activeTheme: progress.activeTheme || "default",
+        activeTrinkets: progress.activeTrinkets || []
+      });
+    }
+
+    let progress = await Progress.findOne({ userId });
+    if (!progress) {
+      progress = new Progress({ userId });
+    }
+
+    if (progress.purchasedItems.includes(itemId)) {
+      return res.status(400).json({ error: "Item already purchased" });
+    }
+
+    if (progress.points < item.cost) {
+      return res.status(400).json({ error: "Insufficient points" });
+    }
+
+    progress.points -= item.cost;
+    progress.purchasedItems.push(itemId);
+    await progress.save();
+
+    res.json({
+      success: true,
+      points: progress.points,
+      purchasedItems: progress.purchasedItems,
+      activeTheme: progress.activeTheme,
+      activeTrinkets: progress.activeTrinkets
+    });
+  } catch (error) {
+    console.error("Error purchasing item:", error);
+    res.status(500).json({ error: "Failed to purchase item" });
+  }
+});
+
+// POST /api/reports/gamification/store/equip - Equip theme/trinket
+router.post("/store/equip", async (req, res) => {
+  try {
+    const { userId, itemId, category } = req.body;
+    if (!userId || !itemId || !category) {
+      return res.status(400).json({ error: "userId, itemId, and category are required" });
+    }
+
+    if (!isDbConnected()) {
+      if (!inMemoryProgress.has(userId)) {
+        inMemoryProgress.set(userId, { userId, points: 0, rank: "Beginner", achievements: [], purchasedItems: [], activeTheme: "default", activeTrinkets: [] });
+      }
+      const progress = inMemoryProgress.get(userId);
+      if (!progress.purchasedItems) progress.purchasedItems = [];
+      if (!progress.activeTrinkets) progress.activeTrinkets = [];
+
+      if (itemId !== "default" && !progress.purchasedItems.includes(itemId)) {
+        return res.status(400).json({ error: "Item not owned" });
+      }
+
+      if (category === "theme") {
+        progress.activeTheme = itemId;
+      } else if (category === "trinket") {
+        const index = progress.activeTrinkets.indexOf(itemId);
+        if (index > -1) {
+          progress.activeTrinkets.splice(index, 1);
+        } else {
+          progress.activeTrinkets.push(itemId);
+        }
+      }
+      return res.json({
+        success: true,
+        activeTheme: progress.activeTheme || "default",
+        activeTrinkets: progress.activeTrinkets || []
+      });
+    }
+
+    let progress = await Progress.findOne({ userId });
+    if (!progress) {
+      progress = new Progress({ userId });
+    }
+
+    if (itemId !== "default" && !progress.purchasedItems.includes(itemId)) {
+      return res.status(400).json({ error: "Item not owned" });
+    }
+
+    if (category === "theme") {
+      progress.activeTheme = itemId;
+    } else if (category === "trinket") {
+      const index = progress.activeTrinkets.indexOf(itemId);
+      if (index > -1) {
+        progress.activeTrinkets.splice(index, 1);
+      } else {
+        progress.activeTrinkets.push(itemId);
+      }
+    }
+
+    await progress.save();
+
+    res.json({
+      success: true,
+      activeTheme: progress.activeTheme,
+      activeTrinkets: progress.activeTrinkets
+    });
+  } catch (error) {
+    console.error("Error equipping item:", error);
+    res.status(500).json({ error: "Failed to equip item" });
   }
 });
 
