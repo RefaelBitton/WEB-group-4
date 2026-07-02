@@ -56,8 +56,17 @@ export function useBot() {
 
     try {
       const response = await sendMessageToBot(userMessageText, apiHistory);
-      const botText = response?.content || "הבוט עדיין לא ענה. נסה שוב";
-      const botMessage = { role: "bot", text: botText };
+      const rawContent = response?.content || "הבוט עדיין לא ענה. נסה שוב";
+      // Extract the main English response (everything before the first double-newline if errors occurred)
+      const botText = response?.evaluation?.hasErrors 
+        ? rawContent.split('\n\n')[0] 
+        : rawContent;
+      
+      const botMessage = { 
+        role: "bot", 
+        text: botText,
+        evaluation: response?.evaluation || null
+      };
       setMessages((prev) => [...prev, botMessage]);
 
       if (voiceEnabled || wasMicUsed) {

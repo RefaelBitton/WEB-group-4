@@ -107,6 +107,31 @@ export function BotChat() {
                   <div className="text-lg leading-relaxed font-medium flex flex-col gap-2" dir="ltr">
                     {isUser ? (
                       message.text
+                    ) : message.evaluation ? (
+                      <>
+                        <div>{message.text}</div>
+                        {message.evaluation.hasErrors && (
+                          <>
+                            {message.evaluation.correction && (
+                              <div 
+                                dir="rtl" 
+                                className="text-rose-600 dark:text-rose-455 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/50 dark:border-rose-900/30 rounded-2xl p-3 mt-2 text-sm font-semibold shadow-sm w-full block text-right"
+                              >
+                                {renderHighlightedText(message.evaluation.correction)}
+                              </div>
+                            )}
+                            {message.evaluation.correctedSentence && (
+                              <div 
+                                dir="ltr" 
+                                className="text-slate-600 dark:text-slate-355 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl p-3 mt-2 text-sm font-semibold shadow-sm w-full block text-left"
+                              >
+                                <span className="text-indigo-600 dark:text-indigo-400 font-bold block mb-1">Correct sentence:</span>
+                                {message.evaluation.correctedSentence}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </>
                     ) : (
                       message.text.split('\n').filter(line => line.trim() !== '').map((line, idx) => {
                         const isCorrection = line.includes("(Hebrew Correction:") || /[\u0590-\u05FF]/.test(line);

@@ -111,17 +111,20 @@ ${agePrompt}`;
     } catch (apiError) {
       console.warn('Gemini API request failed, using fallback response. Error:', apiError.message);
       const fallbacks = [
-        { response: "That's wonderful! Can you tell me more about it in simple words?", hasErrors: false, correction: "" },
-        { response: "Nice! What is your favorite animal or hobby?", hasErrors: false, correction: "" },
-        { response: "I like talking to you! What did you do today?", hasErrors: false, correction: "" }
+        { response: "That's wonderful! Can you tell me more about it in simple words?", hasErrors: false, correction: "", correctedSentence: "" },
+        { response: "Nice! What is your favorite animal or hobby?", hasErrors: false, correction: "", correctedSentence: "" },
+        { response: "I like talking to you! What did you do today?", hasErrors: false, correction: "", correctedSentence: "" }
       ];
       evaluation = fallbacks[Math.floor(Math.random() * fallbacks.length)];
     }
 
-    // Format content by appending Hebrew correction if mistakes exist (separated by two newlines for clean separation)
+    // Format content by appending Hebrew correction and corrected English sentence if mistakes exist
     let content = evaluation.response;
     if (evaluation.hasErrors && evaluation.correction) {
-      content += `\n\n(Hebrew Correction: ${evaluation.correction})`;
+      content += `\n\n${evaluation.correction}`;
+    }
+    if (evaluation.hasErrors && evaluation.correctedSentence) {
+      content += `\n\nCorrect: ${evaluation.correctedSentence}`;
     }
 
     // Log chat activity to reporting service asynchronously
@@ -153,7 +156,8 @@ ${agePrompt}`;
       content: content,
       evaluation: {
         hasErrors: evaluation.hasErrors,
-        correction: evaluation.correction
+        correction: evaluation.correction,
+        correctedSentence: evaluation.correctedSentence || ''
       }
     });
 
@@ -232,7 +236,8 @@ ${agePrompt}`;
       evaluation = {
         response: "I like talking to you! Let's practice more.",
         hasErrors: false,
-        correction: ""
+        correction: "",
+        correctedSentence: ""
       };
     }
 
