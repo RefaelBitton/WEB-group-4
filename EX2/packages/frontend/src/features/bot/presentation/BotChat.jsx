@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { useBot } from "../data/botState.js";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Mic, MicOff, Send, Sparkles } from "lucide-react";
+import { ArrowRight, Mic, MicOff, Send, Sparkles, Volume2, VolumeX } from "lucide-react";
 
 const renderHighlightedText = (text) => {
   if (!text) return null;
@@ -23,7 +23,8 @@ const renderHighlightedText = (text) => {
 export function BotChat() {
   const { 
     messages, input, setInput, sendMessage, 
-    starter, loading, error, isRecording, toggleRecording 
+    starter, loading, error, isRecording, toggleRecording,
+    voiceEnabled, setVoiceEnabled, speakText
   } = useBot();
 
   const messagesEndRef = useRef(null);
@@ -89,9 +90,20 @@ export function BotChat() {
                     ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-tr-sm" 
                     : "bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-sm"
                 }`}>
-                  <p className={`text-xs mb-2 font-semibold tracking-wider uppercase opacity-80 ${isUser ? "text-indigo-200" : "text-slate-400 dark:text-slate-500"}`}>
-                    {isUser ? "את/ה" : "הבוט"}
-                  </p>
+                  <div className="flex items-center justify-between gap-4 mb-2">
+                    <p className={`text-xs font-semibold tracking-wider uppercase opacity-80 ${isUser ? "text-indigo-200" : "text-slate-400 dark:text-slate-500"}`}>
+                      {isUser ? "את/ה" : "הבוט"}
+                    </p>
+                    {!isUser && (
+                      <button
+                        onClick={() => speakText(message.text)}
+                        className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+                        title="השמע שוב"
+                      >
+                        <Volume2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                   <div className="text-lg leading-relaxed font-medium flex flex-col gap-2" dir="ltr">
                     {isUser ? (
                       message.text
@@ -136,6 +148,18 @@ export function BotChat() {
           )}
           
           <div className="flex items-end gap-3 relative bg-slate-50 dark:bg-slate-800 p-2 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-inner focus-within:ring-2 focus-within:ring-indigo-300 dark:focus-within:ring-indigo-500 focus-within:border-indigo-400 transition-all">
+            <button
+              onClick={() => setVoiceEnabled(!voiceEnabled)}
+              className={`p-4 rounded-full shadow-sm transition-all duration-300 flex-shrink-0 cursor-pointer ${
+                voiceEnabled 
+                  ? "bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 border border-indigo-200 dark:border-indigo-900" 
+                  : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700"
+              }`}
+              title={voiceEnabled ? "השבת הקראה קולית" : "הפעל הקראה קולית"}
+            >
+              {voiceEnabled ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
+            </button>
+
             <button
               onClick={toggleRecording}
               className={`p-4 rounded-full shadow-sm transition-all duration-300 flex-shrink-0 cursor-pointer ${
