@@ -240,9 +240,26 @@ export function useBot() {
     }
   };
 
-  const speakText = (text) => {
-    if (!window.speechSynthesis) return;
+  const speakWithGoogleTTS = (text) => {
+    try {
+      const shortText = text.substring(0, 200);
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(shortText)}`;
+      const audio = new Audio(url);
+      
+      if (window._activeTTSAudio) {
+        window._activeTTSAudio.pause();
+      }
+      window._activeTTSAudio = audio;
+      
+      audio.play().catch(err => {
+        console.warn("Google TTS audio play failed:", err);
+      });
+    } catch (err) {
+      console.error("Google TTS initialization failed:", err);
+    }
+  };
 
+  const speakText = (text) => {
     // Filter out Hebrew characters/lines and metadata to speak only English
     const cleanText = text
       .split("\n")
@@ -252,7 +269,19 @@ export function useBot() {
 
     if (!cleanText) return;
 
-    // Stop any ongoing speech
+    // Stop any ongoing Google TTS fallback audio
+    if (window._activeTTSAudio) {
+      try {
+        window._activeTTSAudio.pause();
+      } catch (e) {}
+    }
+
+    if (!window.speechSynthesis) {
+      speakWithGoogleTTS(cleanText);
+      return;
+    }
+
+    // Stop any ongoing native speech
     window.speechSynthesis.cancel();
 
     // Chrome bug workaround: always resume to clear any stuck paused state
@@ -272,8 +301,6 @@ export function useBot() {
         // Select an English voice if available
         const voices = window.speechSynthesis.getVoices();
         if (voices && voices.length > 0) {
-          // Do not fall back to voices[0] unless it is actually English.
-          // Fallback to undefined so browser defaults to standard English TTS handler.
           const enVoice = voices.find(v => 
             v.lang.startsWith("en-US") || 
             v.lang.startsWith("en-GB") || 
@@ -287,6 +314,10 @@ export function useBot() {
 
         utterance.onerror = (e) => {
           console.error("SpeechSynthesisUtterance error:", e);
+          if (e.error === "synthesis-failed" || e.error === "language-unavailable") {
+            console.log("SpeechSynthesis failed. Falling back to Google Translate TTS...");
+            speakWithGoogleTTS(cleanText);
+          }
         };
 
         window.speechSynthesis.speak(utterance);
@@ -297,6 +328,7 @@ export function useBot() {
         }
       } catch (err) {
         console.error("Failed to speak text:", err);
+        speakWithGoogleTTS(cleanText);
       }
     }, 200);
   };
