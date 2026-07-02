@@ -6,7 +6,8 @@ import {
   fetchLeaderboard,
   fetchStoreItems,
   buyStoreItem,
-  equipStoreItem
+  equipStoreItem,
+  fetchProgressionReport
 } from "../logic/gamificationApi";
 
 const getWsUrl = () => {
@@ -24,6 +25,7 @@ export const useGamificationStore = create((set, get) => ({
   activeTrinkets: [],
   leaderboard: [],
   storeItems: [],
+  progressionData: null,
   loading: false,
   error: null,
   milestonePopup: null, // { type: 'rank'|'badge', name: string }
@@ -167,6 +169,15 @@ export const useGamificationStore = create((set, get) => ({
       throw err;
     } finally {
       set({ loading: false });
+    }
+  },
+
+  loadProgressionData: async (userId) => {
+    try {
+      const data = await fetchProgressionReport(userId);
+      set({ progressionData: data });
+    } catch (err) {
+      console.error("Error loading progression stats:", err);
     }
   },
 

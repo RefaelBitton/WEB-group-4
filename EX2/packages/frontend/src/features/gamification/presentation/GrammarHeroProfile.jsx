@@ -40,6 +40,7 @@ export default function GrammarHeroProfile() {
     activeTrinkets,
     leaderboard,
     storeItems,
+    progressionData,
     loading, 
     error, 
     loadStats, 
@@ -49,7 +50,8 @@ export default function GrammarHeroProfile() {
     loadLeaderboard,
     loadStoreItems,
     buyItem,
-    equipItem
+    equipItem,
+    loadProgressionData
   } = useGamificationStore();
   
   const navigate = useNavigate();
@@ -63,8 +65,9 @@ export default function GrammarHeroProfile() {
   useEffect(() => {
     if (user?._id) {
       loadStats(user._id);
+      loadProgressionData(user._id);
     }
-  }, [user, loadStats]);
+  }, [user, loadStats, loadProgressionData]);
 
   useEffect(() => {
     if (activeTab === "leaderboard") {
@@ -212,7 +215,201 @@ export default function GrammarHeroProfile() {
             <p className="text-slate-500 dark:text-slate-400 text-md mt-4 font-medium">המשך לפתור שאלות ולדבר עם הבוט כדי לזכות בנקודות ולטפס בדרגות!</p>
           </div>
 
-          {/* Card 4: Achievements list */}
+          {/* Card 4: Progression Graphs */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm md:col-span-2 transition-colors duration-300">
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+              <Activity className="text-indigo-500" />
+              מדדי הלמידה וההתקדמות שלי
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              
+              {/* Success Rings & Time Spent Breakdown */}
+              <div className="flex flex-col gap-6">
+                <h4 className="text-lg font-bold text-slate-700 dark:text-slate-350">סיכום הצלחה וזמן תרגול</h4>
+                
+                {/* Concentric progress rings */}
+                <div className="flex justify-around items-center gap-4 bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-900/30 rounded-3xl p-6">
+                  {/* Games success ring */}
+                  <div className="flex flex-col items-center">
+                    <div className="relative w-20 h-20">
+                      <svg width="80" height="80" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="#e2e8f0" strokeWidth="8"></circle>
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="#10b981" strokeWidth="8" 
+                          strokeDasharray="213.6" 
+                          strokeDashoffset={213.6 - (213.6 * (progressionData?.successRates?.game || 0)) / 100} 
+                          strokeLinecap="round" 
+                          transform="rotate(-90 40 40)"
+                          className="transition-all duration-1000 animate-pulse"
+                        ></circle>
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center font-black text-emerald-600 dark:text-emerald-400 text-lg">
+                        {progressionData?.successRates?.game || 0}%
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 mt-2">הצלחה במשחקים</span>
+                  </div>
+
+                  {/* Chat success ring */}
+                  <div className="flex flex-col items-center">
+                    <div className="relative w-20 h-20">
+                      <svg width="80" height="80" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="#e2e8f0" strokeWidth="8"></circle>
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="#6366f1" strokeWidth="8" 
+                          strokeDasharray="213.6" 
+                          strokeDashoffset={213.6 - (213.6 * (progressionData?.successRates?.chat || 0)) / 100} 
+                          strokeLinecap="round" 
+                          transform="rotate(-90 40 40)"
+                          className="transition-all duration-1000 animate-pulse"
+                        ></circle>
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center font-black text-indigo-600 dark:text-indigo-400 text-lg">
+                        {progressionData?.successRates?.chat || 0}%
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 mt-2">הצלחה בצ'אט</span>
+                  </div>
+                </div>
+
+                {/* Time spent bar breakdown */}
+                <div className="bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-900/30 rounded-3xl p-6 flex flex-col justify-center">
+                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">
+                    <span>חלוקת זמן תרגול</span>
+                    <span>סה"כ: {progressionData?.timeSpent?.total || 0} דקות</span>
+                  </div>
+                  {/* Progress bar stack */}
+                  <div className="w-full h-4 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden flex">
+                    {(() => {
+                      const chatMins = progressionData?.timeSpent?.breakdown?.chat || 0;
+                      const gameMins = progressionData?.timeSpent?.breakdown?.game || 0;
+                      const arenaMins = progressionData?.timeSpent?.breakdown?.arena || 0;
+                      const total = chatMins + gameMins + arenaMins || 1;
+
+                      const chatPct = (chatMins / total) * 100;
+                      const gamePct = (gameMins / total) * 100;
+                      const arenaPct = (arenaMins / total) * 100;
+
+                      return (
+                        <>
+                          <div style={{ width: `${gamePct}%` }} className="bg-indigo-500 h-full animate-pulse" title="משחקים"></div>
+                          <div style={{ width: `${chatPct}%` }} className="bg-emerald-500 h-full animate-pulse" title="צ'אט"></div>
+                          <div style={{ width: `${arenaPct}%` }} className="bg-amber-500 h-full animate-pulse" title="זירה"></div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                  <div className="flex gap-4 justify-center text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-3">
+                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-indigo-500 rounded-full"></span>משחקים</span>
+                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>צ'אט</span>
+                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>זירה</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Weekly points growth graph */}
+              <div className="flex flex-col gap-6">
+                <h4 className="text-lg font-bold text-slate-700 dark:text-slate-350">קצב צבירת הנקודות שלך</h4>
+                
+                {/* SVG Line Chart */}
+                <div className="bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-900/30 rounded-3xl p-6 flex flex-col justify-between items-stretch h-full min-h-[220px]">
+                  {(() => {
+                    const days = ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ש'"];
+                    const recentActivities = progressionData?.recentActivities || [];
+                    const dailyScores = Array(7).fill(0);
+                    const now = new Date();
+                    
+                    recentActivities.forEach(act => {
+                      const actDate = new Date(act.timestamp);
+                      const diffDays = Math.floor((now - actDate) / (1000 * 60 * 60 * 24));
+                      if (diffDays >= 0 && diffDays < 7) {
+                        dailyScores[6 - diffDays] += act.score || 0;
+                      }
+                    });
+
+                    let currentAccum = points - dailyScores.reduce((a, b) => a + b, 0);
+                    if (currentAccum < 0) currentAccum = 0;
+
+                    const cumulativeData = dailyScores.map(score => {
+                      currentAccum += score;
+                      return currentAccum;
+                    });
+
+                    const maxVal = Math.max(...cumulativeData, 100);
+                    
+                    const pointsCoords = cumulativeData.map((val, idx) => {
+                      const x = 20 + idx * 42;
+                      const y = 90 - (val / maxVal) * 80;
+                      return { x, y, val };
+                    });
+
+                    const pathD = pointsCoords.reduce((acc, coord, idx) => {
+                      return acc + `${idx === 0 ? "M" : "L"} ${coord.x} ${coord.y} `;
+                    }, "");
+
+                    return (
+                      <>
+                        <div className="relative w-full h-[140px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-2 flex flex-col justify-end">
+                          <div className="absolute left-2 top-2 bottom-6 flex flex-col justify-between text-[8px] font-black text-slate-400 select-none">
+                            <span>{Math.round(maxVal)}</span>
+                            <span>{Math.round(maxVal / 2)}</span>
+                            <span>0</span>
+                          </div>
+
+                          <svg width="100%" height="100px" viewBox="0 0 300 100" preserveAspectRatio="none" className="ml-5">
+                            <line x1="0" y1="10" x2="300" y2="10" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3,3"></line>
+                            <line x1="0" y1="50" x2="300" y2="50" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3,3"></line>
+                            <line x1="0" y1="90" x2="300" y2="90" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3,3"></line>
+                            
+                            {pathD && (
+                              <>
+                                <path 
+                                  d={pathD} 
+                                  fill="none" 
+                                  stroke="url(#graph-gradient)" 
+                                  strokeWidth="4" 
+                                  strokeLinecap="round"
+                                  className="transition-all duration-1000"
+                                ></path>
+                                
+                                {pointsCoords.map((coord, idx) => (
+                                  <g key={idx}>
+                                    <circle 
+                                      cx={coord.x} 
+                                      cy={coord.y} 
+                                      r="4.5" 
+                                      fill="#6366f1" 
+                                      stroke="#ffffff" 
+                                      strokeWidth="1.5"
+                                    ></circle>
+                                  </g>
+                                ))}
+                              </>
+                            )}
+
+                            <defs>
+                              <linearGradient id="graph-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#6366f1"></stop>
+                                <stop offset="100%" stopColor="#d946ef"></stop>
+                              </linearGradient>
+                            </defs>
+                          </svg>
+                        </div>
+                        
+                        <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 mt-2 px-1 ml-5 select-none" dir="ltr">
+                          {days.map((day, idx) => (
+                            <span key={idx} className="w-8 text-center">{day}</span>
+                          ))}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Card 5: Achievements list */}
           <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm md:col-span-2 transition-colors duration-300">
             <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
               <Award className="text-amber-500" />
@@ -260,7 +457,7 @@ export default function GrammarHeroProfile() {
                 const isSelf = player.userId === user?._id;
                 const hasCrown = player.activeTrinkets?.includes("golden-crown");
                 
-                let rankStyle = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300";
+                let rankStyle = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-350";
                 if (index === 0) rankStyle = "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300";
                 if (index === 1) rankStyle = "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300";
                 if (index === 2) rankStyle = "bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border border-orange-300";
@@ -358,7 +555,7 @@ export default function GrammarHeroProfile() {
                           className={`w-full py-2.5 rounded-full font-bold transition-all cursor-pointer ${
                             isActive
                               ? "bg-emerald-500 text-white cursor-default"
-                              : "bg-indigo-50 dark:bg-indigo-950 text-indigo-650 dark:text-indigo-400 hover:bg-indigo-100"
+                              : "bg-indigo-50 dark:bg-indigo-950 text-indigo-655 dark:text-indigo-400 hover:bg-indigo-100"
                           }`}
                           disabled={isActive}
                         >
@@ -431,7 +628,7 @@ export default function GrammarHeroProfile() {
       {/* Simulator Panel (Only visible in debug mode or for parents) */}
       {showDebugPanel && activeTab === "profile" && (
         <div className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-inner md:col-span-2 mt-8 animate-fade-in w-full max-w-4xl transition-colors duration-300">
-          <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
+          <h3 className="text-xl font-bold text-slate-700 dark:text-slate-350 mb-4 flex items-center gap-2">
             <Play className="text-slate-500" />
             לוח בקרה למאמן (הדמיית צבירת הישגים - למפתחים)
           </h3>
@@ -475,7 +672,7 @@ export default function GrammarHeroProfile() {
             <button
               disabled={loading}
               onClick={() => user?._id && triggerAward(user._id, "three_games_completed")}
-              className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl text-slate-705 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer animate-fade-in"
+              className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl text-slate-755 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer animate-fade-in"
             >
               סיום 3 משחקים (+40 נקודות)
             </button>

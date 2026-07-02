@@ -61,3 +61,11 @@ export async function equipStoreItem(userId, itemId, category) {
   }
   return response.json();
 }
+
+export async function fetchProgressionReport(userId) {
+  const response = await fetch(`${API_BASE}/api/reports/${userId}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch progression report");
+  }
+  return response.json();
+}
