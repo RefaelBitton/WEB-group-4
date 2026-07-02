@@ -217,27 +217,41 @@ export function useBot() {
   const speakText = (text) => {
     if (!window.speechSynthesis) return;
     
-    // Stop any ongoing speech
+    // Stop any ongoing speech and ensure the engine isn't paused/stuck
     window.speechSynthesis.cancel();
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
     
     // Filter out the Hebrew Correction part to speak only English
     const englishText = text.split(/\n\n\(Hebrew Correction:/)[0].trim();
     if (!englishText) return;
 
     setTimeout(() => {
-      const utterance = new SpeechSynthesisUtterance(englishText);
-      utterance.lang = "en-US";
+      try {
+        const utterance = new SpeechSynthesisUtterance(englishText);
+        utterance.lang = "en-US";
 
-      // Select an English voice if available
-      const voices = window.speechSynthesis.getVoices();
-      if (voices && voices.length > 0) {
-        const enVoice = voices.find(v => v.lang.startsWith("en-US") || v.lang.startsWith("en-GB") || v.lang.startsWith("en")) || voices[0];
-        if (enVoice) {
-          utterance.voice = enVoice;
+        // Prevent garbage collection of the active utterance object
+        window._activeUtterance = utterance;
+
+        // Select an English voice if available
+        const voices = window.speechSynthesis.getVoices();
+        if (voices && voices.length > 0) {
+          const enVoice = voices.find(v => v.lang.startsWith("en-US") || v.lang.startsWith("en-GB") || v.lang.startsWith("en")) || voices[0];
+          if (enVoice) {
+            utterance.voice = enVoice;
+          }
         }
-      }
 
-      window.speechSynthesis.speak(utterance);
+        utterance.onerror = (e) => {
+          console.error("SpeechSynthesisUtterance error:", e);
+        };
+
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.error("Failed to speak text:", err);
+      }
     }, 100);
   };
 
