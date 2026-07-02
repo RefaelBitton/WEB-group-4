@@ -13,6 +13,17 @@ export function useBot() {
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
 
+  const [voiceEnabled, setVoiceEnabledState] = useState(() => {
+    return localStorage.getItem("bot_voice_enabled") === "true";
+  });
+
+  const setVoiceEnabled = (val) => {
+    setVoiceEnabledState(val);
+    localStorage.setItem("bot_voice_enabled", val ? "true" : "false");
+  };
+
+  const usedMicForMessage = useRef(false);
+
   useEffect(() => {
     async function loadStarter() {
       try {
@@ -29,6 +40,9 @@ export function useBot() {
     if (!input.trim()) return;
     
     const userMessageText = input.trim();
+    const wasMicUsed = usedMicForMessage.current;
+    usedMicForMessage.current = false;
+
     const apiHistory = messages.map(msg => ({
       role: msg.role,
       content: msg.text
@@ -45,6 +59,13 @@ export function useBot() {
       const botText = response?.content || "הבוט עדיין לא ענה. נסה שוב";
       const botMessage = { role: "bot", text: botText };
       setMessages((prev) => [...prev, botMessage]);
+
+      if (voiceEnabled || wasMicUsed) {
+        if (wasMicUsed && !voiceEnabled) {
+          setVoiceEnabled(true);
+        }
+        speakText(botText);
+      }
 
       // Award gamification points only for a correct sentence (hasErrors === false)
       const currentChildId = useUserStore.getState().user?._id;
@@ -111,6 +132,7 @@ export function useBot() {
               const text = transcription?.transcription || transcription?.text || "";
               if (text) {
                 setInput((prev) => (prev ? `${prev} ${text}` : text));
+                usedMicForMessage.current = true;
               } else {
                 setError("לא התקבל טקסט מהשרת. נסה שוב.");
               }
@@ -159,6 +181,7 @@ export function useBot() {
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+      usedMicForMessage.current = true;
     };
 
     recognition.onerror = (event) => {
@@ -182,6 +205,28 @@ export function useBot() {
     }
   };
 
+  const speakText = (text) => {
+    if (!window.speechSynthesis) return;
+    
+    // Stop any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    // Filter out the Hebrew Correction part to speak only English
+    const englishText = text.split(/\n\n\(Hebrew Correction:/)[0].trim();
+    if (!englishText) return;
+
+    const utterance = new SpeechSynthesisUtterance(englishText);
+    utterance.lang = "en-US";
+
+    // Select an English voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const enVoice = voices.find(v => v.lang.startsWith("en-US") || v.lang.startsWith("en-GB") || v.lang.startsWith("en")) || voices[0];
+    if (enVoice) {
+      utterance.voice = enVoice;
+    }
+
+    window.speechSynthesis.speak(utterance);
+  };
 
   return {
     messages,
@@ -193,5 +238,8 @@ export function useBot() {
     error,
     isRecording,
     toggleRecording,
+    voiceEnabled,
+    setVoiceEnabled,
+    speakText,
   };
 }
