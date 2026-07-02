@@ -11,7 +11,8 @@ Thumbs.db
 .env
 .env.*
 
-
+.superpowers/
+docs/superpowers/
 
 # Ignore all .env files
 .env
